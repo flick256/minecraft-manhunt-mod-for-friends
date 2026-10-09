@@ -542,6 +542,10 @@ public final class ManhuntCommands {
 			return fail(src, NOT_READY);
 		}
 		String name = StringArgumentType.getString(c, "name").trim();
+		ServerPlayer self = src.getPlayer();
+		if (self != null && (sameOwner(name, self.getGameProfile().name()) || sameOwner(name, self.getUUID().toString()))) {
+			return fail(src, "You cannot remove yourself. Ask another owner or use the console.");
+		}
 		List<String> owners = g.config().owners;
 		if (owners == null || !owners.removeIf(entry -> sameOwner(entry, name))) {
 			return fail(src, name + " is not in the owner list.");
@@ -653,6 +657,12 @@ public final class ManhuntCommands {
 		}
 		if (g.phase() != Phase.IDLE) {
 			return fail(src, "You can only leave a team while the game is idle");
+		}
+		if (g.roster().isHunter(p.getUUID())) {
+			return fail(src, "Only an owner can change a hunter's role.");
+		}
+		if (!g.settings().teamSelfSelect) {
+			return fail(src, "Only owners can change teams.");
 		}
 		String err = g.unassign(p.getUUID());
 		if (err != null) {

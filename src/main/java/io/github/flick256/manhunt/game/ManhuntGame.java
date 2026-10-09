@@ -163,7 +163,7 @@ public final class ManhuntGame {
 
         phase = Phase.HEAD_START;
         startTick = tickCounter;
-        double scale = timeScale();
+        double scale = relaxed ? timeScale() : 1.0; // fast timers only apply to test games
         if (kind == GameKind.CLASSIC) {
             List<UUID> hunters = new ArrayList<>(roster.hunters());
             int[] secs = Schedule.releaseSeconds(hunters.size(), settings().headStartSeconds,
@@ -261,19 +261,17 @@ public final class ManhuntGame {
     }
 
     public void tick() {
+        ceremony.tick(); // real shows and test-lab previews run in every phase
+        test.tick();     // preview-freeze countdown also runs while idle
         if (phase == Phase.IDLE) return;
         tickCounter++;
-        if (phase == Phase.CELEBRATION) {
-            ceremony.tick();
-            return;
-        }
+        if (phase == Phase.CELEBRATION) return;
         processReleases();
         freeze.tick(server);
         sync.tick();
         if (!isGameActive()) return; // sync may have ended the game (team down)
         compass.tick();
         quiz.tick();
-        test.tick();
     }
 
     public int secondsUntilRelease(UUID hunter) {
@@ -317,10 +315,13 @@ public final class ManhuntGame {
         return null;
     }
 
+    private static final int MAX_TEAMS = 8;
+
     public String createTeam(String id, String displayName, String color) {
         String err = requireIdle();
         if (err != null) return err;
         if (kind != GameKind.TEAMS) return "Teams are only used in Teams mode.";
+        if (roster.teams().size() >= MAX_TEAMS) return "At most " + MAX_TEAMS + " teams.";
         return roster.createTeam(id, displayName, color);
     }
 

@@ -73,9 +73,10 @@ public final class Owner {
 		if (src == null) {
 			return false;
 		}
-		// Rule 1. Console / RCON have no entity. (Command blocks also have none: see report gap.)
+		// Rule 1. Console / RCON have no entity and run at the top permission level; command blocks
+		// (also entity-less) only run at level 2 and must NOT count as owner.
 		if (src.getEntity() == null) {
-			return true;
+			return src.checkPermission(ADMIN_PERMISSION, PermissionLevel.OWNERS);
 		}
 		if (src.getEntity() instanceof ServerPlayer player) {
 			return isOwner(player);

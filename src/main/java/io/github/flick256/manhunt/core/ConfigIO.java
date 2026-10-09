@@ -53,7 +53,17 @@ public final class ConfigIO {
             cfg.kind = enumOr(obj, "kind", GameKind.class, GameKind.CLASSIC);
             return finish(cfg);
         } catch (Exception | StackOverflowError e) {
+            backupBroken(file);
             return finish(new ManhuntConfig());
+        }
+    }
+
+    /** Keeps a copy of an unreadable config so the next save does not silently destroy it. */
+    private static void backupBroken(Path file) {
+        try {
+            Files.copy(file, file.resolveSibling(file.getFileName() + ".broken"), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        } catch (Exception ignored) {
+            // best effort
         }
     }
 

@@ -62,16 +62,20 @@ public final class TestLab {
      * Starts a CLASSIC game in which the owner is the only real runner, with the virtual teammate
      * {@value #VIRTUAL_NAME} sharing the team pool. Returns null on success, otherwise an error message.
      */
+    private boolean ownerWasRunner;
+    private boolean ownerWasHunter;
+
     public String startSolo(ServerPlayer owner) {
         if (game.phase() != Phase.IDLE) {
             return "Stop the current game first";
         }
-        String err = game.setKind(GameKind.CLASSIC);
-        if (err != null) {
-            return err;
+        if (game.kind() != GameKind.CLASSIC) {
+            return "Switch to Classic mode first (the solo test uses the runner team).";
         }
         game.roster().ensureClassicTeam();
-        err = game.roster().assignRunner(owner.getUUID(), Roster.CLASSIC_TEAM);
+        ownerWasRunner = game.roster().isRunner(owner.getUUID());
+        ownerWasHunter = game.roster().isHunter(owner.getUUID());
+        String err = game.roster().assignRunner(owner.getUUID(), Roster.CLASSIC_TEAM);
         if (err != null) {
             return err;
         }
@@ -103,7 +107,11 @@ public final class TestLab {
         releaseFreeze();
         game.stop(false);
         if (wasActive && owner != null) {
-            game.unassign(owner);
+            if (ownerWasHunter) {
+                game.roster().assignHunter(owner);
+            } else if (!ownerWasRunner) {
+                game.roster().unassign(owner);
+            }
         }
     }
 
@@ -160,6 +168,10 @@ public final class TestLab {
 
     /** Freezes the owner for {@code seconds} with an action bar countdown. Timers scaling does not apply. */
     public void previewFreeze(ServerPlayer owner, int seconds) {
+        if (game.isGameActive() && !active) {
+            Msg.send(owner, Msg.bad("Not during a real game."));
+            return;
+        }
         int s = Math.max(1, Math.min(seconds, FREEZE_MAX_SECONDS));
         releaseFreeze();
         freezeOwner = owner.getUUID();
@@ -185,6 +197,10 @@ public final class TestLab {
 
     /** Runs the respawn quiz for the owner regardless of the mathRespawn setting. */
     public void quizNow(ServerPlayer owner) {
+        if (game.isGameActive() && !active) {
+            Msg.send(owner, Msg.bad("Not during a real game."));
+            return;
+        }
         game.quiz().start(owner);
     }
 
