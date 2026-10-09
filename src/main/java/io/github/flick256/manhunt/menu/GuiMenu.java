@@ -130,6 +130,16 @@ public abstract class GuiMenu extends AbstractContainerMenu {
 
 	@Override
 	public void clicked(int slotId, int clickData, ContainerInput containerInput, Player player) {
+		try {
+			handleClick(slotId, clickData, containerInput, player);
+		} finally {
+			// The client predicts picking the icon up. Whatever happened here, resend the real (server) state
+			// including the cursor, so no phantom item stays on the player's mouse.
+			broadcastFullState();
+		}
+	}
+
+	private void handleClick(int slotId, int clickData, ContainerInput containerInput, Player player) {
 		// Cancel everything: this menu never lets items move. Only our own top-slot icons react.
 		if (!(player instanceof ServerPlayer serverPlayer)) {
 			return;
@@ -137,7 +147,6 @@ public abstract class GuiMenu extends AbstractContainerMenu {
 		if (slotId < 0 || slotId >= SIZE) {
 			return;
 		}
-		// VERIFY: ContainerInput constants PICKUP and QUICK_MOVE (ClickType renamed; names not in reference tree).
 		if (containerInput != ContainerInput.PICKUP && containerInput != ContainerInput.QUICK_MOVE) {
 			return;
 		}
