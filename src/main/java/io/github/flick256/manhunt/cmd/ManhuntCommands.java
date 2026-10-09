@@ -157,7 +157,7 @@ public final class ManhuntCommands {
 												.then(argument("difficulty", IntegerArgumentType.integer(1, 3))
 														.executes(c -> setMathQuiz(c, true,
 																IntegerArgumentType.getInteger(c, "questions"),
-																IntegerArgumentType.getInteger(c, "difficulty")))))))
+																IntegerArgumentType.getInteger(c, "difficulty"))))))))
 				// ---- owner: owner list
 				.then(literal("owner").requires(OWNER)
 						.executes(usageOf("/manhunt owner add|remove <name> | owner list"))

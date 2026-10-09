@@ -1,0 +1,9 @@
+-proc:none
+-d
+/tmp/claude-0/-home-user-minecraft-manhunt-mod-for-friends/74f00f67-341d-5e54-882d-a109aa52503b/scratchpad/javac-out
+-sourcepath
+src/main/java
+src/main/java/io/github/flick256/manhunt/util/Msg.java
+src/main/java/io/github/flick256/manhunt/util/Owner.java
+src/main/java/io/github/flick256/manhunt/util/TextUtil.java
+src/main/java/io/github/flick256/manhunt/cmd/ManhuntCommands.java
