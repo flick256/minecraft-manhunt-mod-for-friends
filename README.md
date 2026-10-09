@@ -175,8 +175,10 @@ Hunters (CLASSIC) and every player (TEAMS) receive a **Runner Tracker** compass 
 
 ## Math respawn
 
-With `mathRespawn` on, a hunter who dies does not come back straight away. They become a spectator and get
-math questions instead. They must answer `mathQuestions` questions correctly (1 to 10) before they respawn.
+With `mathRespawn` on, a hunter who dies does not get back into the hunt straight away. They respawn, but they are
+**frozen in place, blinded and cannot interact** (not in spectator mode, so they cannot fly around and scout the
+runners; dying is a real cost). They get math questions instead, and must answer `mathQuestions` questions correctly
+(1 to 10) before they can move and see again.
 Difficulty is `mathDifficulty` (1 to 3).
 
 * Answer in chat, or with `/manhunt answer <number>`.

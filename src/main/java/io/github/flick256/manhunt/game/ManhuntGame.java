@@ -422,7 +422,7 @@ public final class ManhuntGame {
         boolean pending = pending(id);
         if (role == Role.HUNTER) {
             if (pending) freeze.freeze(p);
-            else if (freeze.isFrozen(id)) freeze.unfreeze(p);
+            else if (freeze.isFrozen(id) && !quiz.isInQuiz(id)) freeze.unfreeze(p);
             if (settings().giveCompass) compass.giveTo(p);
             return;
         }

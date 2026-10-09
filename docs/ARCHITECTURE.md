@@ -199,7 +199,7 @@ public final class TeamSync {                         // W4
 
 public final class RespawnQuiz {                      // W6
   public RespawnQuiz(ManhuntGame game);
-  public void onHunterRespawned(ServerPlayer p);      // spectator + first question (needs settings.mathQuestions correct answers)
+  public void onHunterRespawned(ServerPlayer p);      // frozen + blind (never spectator: it would let the hunter scout) + first question (needs settings.mathQuestions correct answers)
   public boolean handleAnswer(ServerPlayer p, String text);  // true if p is in quiz and text was consumed (right or wrong)
   public boolean isInQuiz(UUID id);
   public void start(ServerPlayer p);                  // used by test lab / onHunterRespawned

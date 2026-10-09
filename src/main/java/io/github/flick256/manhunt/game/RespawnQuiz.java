@@ -8,7 +8,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.level.GameType;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,12 +17,16 @@ import java.util.Random;
 import java.util.UUID;
 
 /**
- * Math quiz a hunter must solve before respawning. While in the quiz the player is kept in spectator mode;
- * state is keyed by UUID so a player who disconnects keeps their progress.
+ * Math quiz a hunter must solve before they can move again after dying. While in the quiz the player is frozen in
+ * place, blinded and invulnerable (NOT in spectator mode: spectators can fly around and scout the runners, which
+ * would make dying an advantage). State is keyed by UUID so a player who disconnects keeps their progress.
  */
 public final class RespawnQuiz {
     /** How often (ticks) the current question is re-shown on the action bar. */
     private static final int REMIND_PERIOD = 60;
+    /** The blindness effect is re-applied this often (ticks) and lasts a bit longer than that. */
+    private static final int BLIND_REFRESH = 40;
+    private static final int BLIND_DURATION = 100;
 
     private static final class State {
         MathQuestion current;
@@ -50,14 +55,14 @@ public final class RespawnQuiz {
         return states.containsKey(id);
     }
 
-    /** Puts the player in spectator mode and asks the first question. Also used by the Test Lab. */
+    /** Freezes + blinds the player and asks the first question. Also used by the Test Lab. */
     public void start(ServerPlayer p) {
         Settings s = game.settings();
         State st = new State();
         st.needed = Math.max(1, s.mathQuestions);
         st.solved = 0;
         states.put(p.getUUID(), st);
-        p.setGameMode(GameType.SPECTATOR); // VERIFY: ServerPlayer#setGameMode(GameType) not in Fabric reference
+        lock(p);
         ask(p, st);
     }
 
@@ -88,8 +93,8 @@ public final class RespawnQuiz {
     }
 
     /**
-     * Re-shows the question on the action bar every {@link #REMIND_PERIOD} ticks and restores spectator mode
-     * for quiz players who are online but no longer spectating (e.g. after reconnecting).
+     * Re-shows the question on the action bar every {@link #REMIND_PERIOD} ticks, keeps the blindness on and
+     * re-freezes quiz players who are online but no longer locked (e.g. after reconnecting).
      */
     public void tick() {
         tickCounter++;
@@ -101,27 +106,45 @@ public final class RespawnQuiz {
             if (p == null) {
                 continue; // offline: keep the state until they come back
             }
-            if (!p.isSpectator()) {
-                p.setGameMode(GameType.SPECTATOR); // VERIFY: ServerPlayer#setGameMode(GameType)
+            if (!game.freeze().isFrozen(e.getKey())) {
+                lock(p);
                 remind(p, e.getValue());
-            } else if (tickCounter % REMIND_PERIOD == 0) {
+            } else if (tickCounter % BLIND_REFRESH == 0) {
+                blind(p);
+            }
+            if (tickCounter % REMIND_PERIOD == 0) {
                 Msg.actionbar(p, actionbar(e.getValue()));
             }
         }
     }
 
-    /** Releases everybody still in the quiz (online players go back to survival) and forgets all state. */
+    /** Releases everybody still in the quiz (online players are unfrozen and can see again) and forgets all state. */
     public void clear() {
         for (UUID id : states.keySet()) {
             ServerPlayer p = game.player(id);
             if (p != null) {
-                p.setGameMode(GameType.SURVIVAL); // VERIFY: ServerPlayer#setGameMode(GameType)
+                unlock(p);
             }
         }
         states.clear();
     }
 
     // ---------------------------------------------------------------- internals
+
+    /** Frozen at the respawn point, blind, invulnerable (the freeze handles the last two and blocks interaction). */
+    private void lock(ServerPlayer p) {
+        game.freeze().freeze(p);
+        blind(p);
+    }
+
+    private void unlock(ServerPlayer p) {
+        game.freeze().unfreeze(p);
+        p.removeEffect(MobEffects.BLINDNESS);
+    }
+
+    private static void blind(ServerPlayer p) {
+        p.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, BLIND_DURATION, 0, false, false, false));
+    }
 
     private void ask(ServerPlayer p, State st) {
         st.current = MathQuiz.next(game.settings().mathDifficulty, rnd);
@@ -142,7 +165,11 @@ public final class RespawnQuiz {
 
     private void release(ServerPlayer p) {
         states.remove(p.getUUID());
-        p.setGameMode(GameType.SURVIVAL); // VERIFY: ServerPlayer#setGameMode(GameType)
+        unlock(p);
+        // Died during the head start: still wait for the normal release time.
+        if (game.secondsUntilRelease(p.getUUID()) > 0) {
+            game.freeze().freeze(p);
+        }
         Msg.title(p,
                 Component.literal("Respawned!").withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD),
                 Component.literal("Back in the hunt").withStyle(ChatFormatting.GRAY),
