@@ -209,7 +209,7 @@ public final class RespawnQuiz {                      // W6
 
 public final class Ceremony {                         // W6
   public Ceremony(ManhuntGame game);
-  public void play(Winner w, List<ServerPlayer> winners, List<ServerPlayer> losers, String winnerLabel);  // ~15s of title, fanfare, particles; RUNNERS/TEAM: golden fireworks-style particles + totem + dragon roar; HUNTERS: lightning (visual only) + wither/ender sounds + red particles
+  public void play(Winner w, List<ServerPlayer> winners, List<ServerPlayer> losers, String winnerLabel);  // ~15s of title, fanfare, particles; RUNNERS/TEAM: golden fireworks-style particles + totem + dragon roar; HUNTERS: thunder/sting sounds + red/soul particles (visual lightning was left out: the spawn API could not be verified)
   public boolean isPlaying();  public void tick();    // when finished calls game.finishCeremony()
   public void cancel();
   public int totalTicks();
@@ -221,7 +221,8 @@ public final class TestLab {                          // W6 (runtime only, not p
   public boolean fastTimers(); public void setFastTimers(boolean on);
   public String startSolo(ServerPlayer owner);        // classic game: owner = only runner on team "runners" with a virtual teammate, phase RUNNING immediately, no hunters required
   public void endSolo();                              // = game.stop(false) + clear flags
-  public void virtualDamage(ServerPlayer owner, float hp); virtualHeal; virtualHunger(int); virtualGear(ServerPlayer owner) /* injects diamond sword,pickaxe,armor,16 golden carrots...*/;
+  public void virtualDamage(ServerPlayer owner, float hp); virtualHeal(ServerPlayer owner, float hp); virtualHunger(ServerPlayer owner, int food); virtualGear(ServerPlayer owner) /* injects diamond sword,pickaxe,armor,16 golden carrots, shield */;
+  public void onGameStopped();                         // called by ManhuntGame.stop(): clears solo flags so a test never leaks into the next real game
   public void previewFreeze(ServerPlayer owner, int seconds);     // freeze owner for N seconds (timeScale ignored), actionbar countdown, then unfreeze
   public void previewStagger(ServerPlayer owner);     // chat: with current settings + 4 fake hunters, when each is released (Schedule.releaseSeconds)
   public void quizNow(ServerPlayer owner);            // RespawnQuiz.start(owner) even if setting off
@@ -269,3 +270,18 @@ Minecraft itself is NOT available locally; Mojang names, unobfuscated. Real comp
 * Effects are `Holder`s: `MobEffects.BLINDNESS`, `.POISON`, `.SATURATION`, `.REGENERATION`, `.ABSORPTION`; `entity.hasEffect(holder)`, `entity.addEffect(new MobEffectInstance(holder, duration, amplifier, ambient, visible, showIcon))`. Game modes: `net.minecraft.world.level.GameType`.
 * Java 25 language level is fine (records, switch patterns, `var`, text blocks, unnamed `_`).
 * Do NOT use mixins and do NOT add new Gradle dependencies.
+
+## Things learned from the first real 26.2 compile
+
+* `Items.<COLOR>_WOOL/DYE/CONCRETE/BANNER/..._STAINED_GLASS_PANE` no longer exist; colored blocks come from color sets: `Blocks.WOOL.red().asItem()`.
+* Entity types: `EntityTypes.PIG`, `EntityTypes.ENDER_DRAGON` (not `EntityType.*`).
+* `SoundEvents.*` constants are a mix of plain `SoundEvent` and `Holder`; `Msg.sound` has overloads for both.
+* `ServerPlayer.playNotifySound` does not exist; sounds go through `level.playSound(null, x, y, z, event, source, vol, pitch)`.
+* Brigadier: `StringArgumentType.string()` (no `quotableString`).
+* CI: `build` compiles + unit tests; `server-smoke-test` boots a real 26.2 dedicated server with the mod and runs console commands.
+
+## Known limitations
+
+* Runtime behaviour with real players (chest GUI clicks, freeze snap-back, ceremony visuals, compass) could not be exercised automatically; only compile, unit tests and the dedicated-server console smoke test run in CI.
+* Two runners changing the same item stack count in the same tick: the first writer wins the count (items in different slots, or different items in one slot, are kept).
+* Late joiners / reconnecting runners get the team inventory written over their own.
