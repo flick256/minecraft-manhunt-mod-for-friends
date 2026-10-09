@@ -46,14 +46,27 @@ On an `online-mode=false` server player names are not authenticated, so list UUI
 
 Everybody else can only use the player commands: `join`, `leave`, `answer`, `status`.
 
-### Essentials-style permissions
+### Playing with the Essential mod (essential.gg)
 
-Permission plugins for Bukkit/Spigot/Paper (EssentialsX, LuckPerms for Bukkit, ...) **cannot load Fabric mods**.
-If you want per-player permissions, run a **Fabric** server (or Quilt) with a permission mod that supports the
-Fabric permission API, such as LuckPerms for Fabric. Grant the node `manhunt:admin` to your admins. Check your
-permission mod's documentation for how to grant a Fabric permission node.
+[Essential](https://essential.gg/) is a client-side mod that hosts your own world for friends over a
+peer-to-peer connection, so the world runs on **the host's computer** (an integrated server, like "Open to LAN").
+That fits this mod:
 
-The simplest setup for a friend group is to put your Minecraft name in `owners`.
+* The **host** needs Fabric Loader, Fabric API, **this mod** and Essential in their `mods` folder (Essential has
+  a Fabric 26.2 build). The mod runs inside the host's world.
+* The host is automatically the **owner** (the first player to join their own integrated server). Friends who join
+  through Essential are not owners, so only the host gets the control panel and the commands. Friends can still use
+  `/manhunt join <team>`, `/manhunt leave`, `/manhunt answer <n>` and `/manhunt status`.
+* Friends do not need this mod, because all the logic and the menus run on the host. They only need whatever
+  Essential needs to join. Installing it on their side as well does no harm.
+* Cheats do not need to be on: the mod checks ownership itself.
+* The Test Lab works in the same world, so you can try everything alone before inviting anyone.
+
+### Dedicated servers
+
+Plugins for Bukkit/Spigot/Paper (EssentialsX and similar) **cannot load Fabric mods**. On a real Fabric server you
+can list yourself in `owners`, or use a permission mod that supports the Fabric permission API (for example
+LuckPerms for Fabric) and grant the node `manhunt:admin`.
 
 ---
 
