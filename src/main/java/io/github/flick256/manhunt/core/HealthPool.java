@@ -37,25 +37,42 @@ public final class HealthPool {
         this.current = clamp(value);
     }
 
+    /** Heals of at most this many hp can be natural regeneration; see {@link #merge(float[], boolean[])}. */
+    static final float SMALL_HEAL = 1.0001f;
+
+    /** Same as {@link #merge(float[], boolean[])} with every member allowed to regenerate. */
+    public float merge(float[] memberHealth) {
+        return merge(memberHealth, null);
+    }
+
     /**
      * Merges the members' observed health against the last written value.
-     * Damage from all members sums; the largest heal counts once. The result is stored and returned.
+     * The largest drop of a single member counts once per tick (one explosion hitting two runners costs the pool
+     * once, not twice); the largest heal counts once. A small heal (natural regeneration is at most 1 hp per
+     * event) is only counted when {@code regenOk[i]} is true for that member, otherwise every extra teammate
+     * would multiply the team's regeneration rate. Bigger heals (potions, golden apples) always count.
+     * The result is stored and returned.
      */
-    public float merge(float[] memberHealth) {
+    public float merge(float[] memberHealth, boolean[] regenOk) {
         if (memberHealth == null || memberHealth.length == 0) {
             return current;
         }
         float last = current;
-        float damageSum = 0f;
+        float worstDrop = 0f;
         float gain = 0f;
-        for (float m : memberHealth) {
+        for (int i = 0; i < memberHealth.length; i++) {
+            float m = memberHealth[i];
             if (m < last - EPS) {
-                damageSum += last - m;
+                worstDrop = Math.max(worstDrop, last - m);
             } else if (m > last + EPS) {
-                gain = Math.max(gain, m - last);
+                float g = m - last;
+                boolean allowed = regenOk == null || i >= regenOk.length || regenOk[i] || g > SMALL_HEAL;
+                if (allowed) {
+                    gain = Math.max(gain, g);
+                }
             }
         }
-        current = clamp(last - damageSum + gain);
+        current = clamp(last - worstDrop + gain);
         return current;
     }
 

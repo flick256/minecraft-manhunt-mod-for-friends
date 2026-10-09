@@ -8,6 +8,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
@@ -192,7 +193,8 @@ public final class TeamSync {
 			return;
 		}
 		String teamId = everTracked.get(id);
-		if (teamId != null && teams.containsKey(teamId)) {
+		Team tracked = teamId == null ? null : teams.get(teamId);
+		if (tracked != null && !tracked.downReported) {
 			addMember(teamId, p);
 			return;
 		}
@@ -304,7 +306,7 @@ public final class TeamSync {
 			reportDown(team);
 			return;
 		}
-		team.health.merge(healthsOf(online));
+		team.health.merge(healthsOf(online), regenOkOf(online));
 		if (team.health.isDead()) {
 			reportDown(team);
 			return;
@@ -363,6 +365,23 @@ public final class TeamSync {
 		List<ItemStack> canonical = resized(ender ? team.canonicalEnder : team.canonicalInv, size);
 		int start = Math.floorMod(team.rotation++, views.size());
 		List<ItemStack> merged = copyList(SlotSync.merge(canonical, views, start, SAME));
+		// Two members changing the same slot in one tick: the loser's stack would be overwritten and vanish.
+		// Re-insert it elsewhere when it is a different item than what won the slot.
+		for (List<ItemStack> view : views) {
+			for (int i = 0; i < size; i++) {
+				ItemStack mine = view.get(i);
+				if (mine.isEmpty() || SAME.test(mine, canonical.get(i))) {
+					continue; // untouched by this member
+				}
+				ItemStack winner = merged.get(i);
+				if (!winner.isEmpty() && ItemStack.isSameItemSameComponents(winner, mine)) {
+					continue; // same item, only the count differs: keep the winner's count
+				}
+				if (winner.isEmpty() || !SAME.test(mine, winner)) {
+					insertIntoCanonical(merged, mine.copy());
+				}
+			}
+		}
 		if (ender) {
 			team.canonicalEnder = merged;
 		} else {
@@ -556,6 +575,19 @@ public final class TeamSync {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Only the first online member's small heals count as natural regeneration (every member regenerates on its
+	 * own timer, so counting all of them would multiply regen by the team size). A member with the Regeneration
+	 * effect (golden apple, potion) always counts.
+	 */
+	private static boolean[] regenOkOf(List<ServerPlayer> online) {
+		boolean[] ok = new boolean[online.size()];
+		for (int i = 0; i < ok.length; i++) {
+			ok[i] = i == 0 || online.get(i).hasEffect(MobEffects.REGENERATION);
+		}
+		return ok;
 	}
 
 	private static float[] healthsOf(List<ServerPlayer> online) {

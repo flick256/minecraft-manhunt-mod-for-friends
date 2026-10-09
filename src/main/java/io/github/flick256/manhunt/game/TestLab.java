@@ -81,7 +81,10 @@ public final class TestLab {
         }
         active = true;
         soloOwner = owner.getUUID();
+        boolean clearSetting = game.settings().clearInventoryOnStart;
+        game.settings().clearInventoryOnStart = false; // never wipe the owner's real inventory for a test
         err = game.start(owner); // ManhuntGame.start accepts test mode: no hunters needed
+        game.settings().clearInventoryOnStart = clearSetting;
         if (err != null) {
             active = false;
             soloOwner = null;
@@ -97,15 +100,14 @@ public final class TestLab {
         return null;
     }
 
-    /** Stops the test game, releases any freeze, clears the flags and removes the owner from the solo team. */
-    public void endSolo() {
+    /** Called by ManhuntGame.stop(): a solo test that ended on its own must not leak into the next real game. */
+    public void onGameStopped() {
         UUID owner = soloOwner;
         boolean wasActive = active;
         active = false;
         fastTimers = false;
         soloOwner = null;
         releaseFreeze();
-        game.stop(false);
         if (wasActive && owner != null) {
             if (ownerWasHunter) {
                 game.roster().assignHunter(owner);
@@ -113,6 +115,13 @@ public final class TestLab {
                 game.roster().unassign(owner);
             }
         }
+    }
+
+    /** Stops the test game, releases any freeze, clears the flags and removes the owner from the solo team. */
+    public void endSolo() {
+        releaseFreeze();
+        game.stop(false); // calls onGameStopped() when a game was running
+        onGameStopped();  // no-op if stop() already did it
     }
 
     public void virtualDamage(ServerPlayer owner, float hp) {
@@ -168,8 +177,8 @@ public final class TestLab {
 
     /** Freezes the owner for {@code seconds} with an action bar countdown. Timers scaling does not apply. */
     public void previewFreeze(ServerPlayer owner, int seconds) {
-        if (game.isGameActive() && !active) {
-            Msg.send(owner, Msg.bad("Not during a real game."));
+        if (!active) {
+            Msg.send(owner, Msg.bad("Start the solo test first (Test Lab -> Start solo test)."));
             return;
         }
         int s = Math.max(1, Math.min(seconds, FREEZE_MAX_SECONDS));
@@ -197,8 +206,8 @@ public final class TestLab {
 
     /** Runs the respawn quiz for the owner regardless of the mathRespawn setting. */
     public void quizNow(ServerPlayer owner) {
-        if (game.isGameActive() && !active) {
-            Msg.send(owner, Msg.bad("Not during a real game."));
+        if (!active) {
+            Msg.send(owner, Msg.bad("Start the solo test first (Test Lab -> Start solo test)."));
             return;
         }
         game.quiz().start(owner);

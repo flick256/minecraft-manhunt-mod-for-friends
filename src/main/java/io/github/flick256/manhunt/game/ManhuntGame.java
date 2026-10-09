@@ -205,6 +205,11 @@ public final class ManhuntGame {
     public void stop(boolean announce) {
         if (phase == Phase.IDLE) return;
         phase = Phase.IDLE; // first, so that anything fired by the cleanup below sees an idle game
+        // Participants who are offline right now keep spectator / invulnerable flags in their save data:
+        // reset them when they next join.
+        for (UUID id : participantIds()) {
+            if (player(id) == null) pendingReset.add(id);
+        }
         freeze.clear(server);
         sync.endAll();
         quiz.clear();
@@ -218,6 +223,7 @@ public final class ManhuntGame {
         downTeams.clear();
         startedTeams.clear();
         firstReleaseAnnounced = false;
+        test.onGameStopped();
         if (announce) Msg.broadcast(server, Msg.bad("The manhunt was stopped."));
     }
 
@@ -316,6 +322,7 @@ public final class ManhuntGame {
     }
 
     private static final int MAX_TEAMS = 8;
+    private final Set<UUID> pendingReset = new HashSet<>();
 
     public String createTeam(String id, String displayName, String color) {
         String err = requireIdle();
@@ -398,6 +405,10 @@ public final class ManhuntGame {
         roster.rememberName(id, p.getGameProfile().name());
         // Players who were modified (max health) and left before the game ended get restored here.
         sync.restoreIfTracked(p);
+        if (pendingReset.remove(id)) {
+            p.setGameMode(GameType.SURVIVAL);
+            p.setInvulnerable(false);
+        }
         if (phase == Phase.IDLE) return;
 
         Role role = roster.roleOf(id);
@@ -484,6 +495,11 @@ public final class ManhuntGame {
         if (!startedTeams.contains(teamId) || !downTeams.add(teamId)) return; // once per team
 
         List<UUID> members = teamMemberIds(teamId);
+        // The player whose damage emptied the pool already dropped the shared inventory when they died; every
+        // teammate holds a full copy, so wipe those before they die or the items would drop once per member.
+        for (ServerPlayer p : onlinePlayers(members)) {
+            if (p.isAlive()) p.getInventory().clearContent();
+        }
         if (kind == GameKind.CLASSIC) {
             for (ServerPlayer p : onlinePlayers(members)) killPlayer(p);
             endGame(new Winner(Side.HUNTERS, null));
@@ -607,8 +623,9 @@ public final class ManhuntGame {
         if (!p.isAlive()) return;
         p.setInvulnerable(false);
         ServerLevel level = (ServerLevel) p.level();
-        // Verified in the 26.2 reference: hurtServer(level, level.damageSources().generic(), amount).
+        // hurtServer is a fallback: totems of undying and resistance can survive it.
         p.hurtServer(level, level.damageSources().generic(), FINAL_DAMAGE);
+        if (p.isAlive()) p.setHealth(0f);
     }
 
     private void rememberOnline(UUID id) {

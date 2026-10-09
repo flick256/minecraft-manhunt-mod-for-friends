@@ -24,10 +24,20 @@ class HealthPoolTest {
     }
 
     @Test
-    void damageFromSeveralMembersInSameTickSums() {
+    void damageFromSeveralMembersInSameTickCountsLargestOnly() {
         HealthPool p = new HealthPool(40, 40);
-        // member damages: 10 and 5 -> total 15
-        assertEquals(25f, p.merge(new float[]{30f, 35f, 40f}), DELTA);
+        // member damages: 10 and 5 from one hit that touched both -> the pool loses the larger one
+        assertEquals(30f, p.merge(new float[]{30f, 35f, 40f}), DELTA);
+    }
+
+    @Test
+    void smallHealFromNonPrimaryMemberIsIgnoredButBigHealCounts() {
+        HealthPool p = new HealthPool(20, 40);
+        // member 1 regenerates 1 hp on its own timer: ignored; member 0 (primary) regen counts
+        assertEquals(20f, p.merge(new float[]{20f, 21f}, new boolean[]{true, false}), DELTA);
+        assertEquals(21f, p.merge(new float[]{21f, 20f}, new boolean[]{true, false}), DELTA);
+        // a golden apple style heal of 4 hp on a non-primary member counts
+        assertEquals(25f, p.merge(new float[]{21f, 25f}, new boolean[]{true, false}), DELTA);
     }
 
     @Test
