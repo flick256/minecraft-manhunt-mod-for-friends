@@ -22,6 +22,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.GameType;
@@ -432,7 +433,7 @@ public final class ManhuntGame {
 
     public void onAfterDeath(LivingEntity e, DamageSource src) {
         if (e == null || !isGameActive()) return;
-        if (e.getType() == EntityType.ENDER_DRAGON) { // VERIFY: EntityType.ENDER_DRAGON (EnderDragon class is not in the local reference)
+        if (e.getType() == EntityTypes.ENDER_DRAGON) { // VERIFY: EntityTypes.ENDER_DRAGON (EnderDragon class is not in the local reference)
             onDragonDeath(src);
             return;
         }

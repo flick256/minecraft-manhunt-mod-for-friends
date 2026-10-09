@@ -10,6 +10,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +40,7 @@ final class TeamsMenu extends GuiMenu {
 		Roster roster = g.roster();
 		boolean classic = g.kind() == GameKind.CLASSIC;
 
-		show(4, Icons.make(Items.WHITE_BANNER, "Teams", ChatFormatting.WHITE,
+		show(4, Icons.make(Blocks.WOOL.white().asItem(), "Teams", ChatFormatting.WHITE,
 				"Mode: " + g.kind(),
 				classic
 						? "CLASSIC: the single runner team is shown here."
@@ -74,7 +75,7 @@ final class TeamsMenu extends GuiMenu {
 					"Use Create team below."));
 		}
 
-		set(19, Icons.make(Items.LIME_DYE, "Create team", ChatFormatting.GREEN,
+		set(19, Icons.make(Blocks.WOOL.lime().asItem(), "Create team", ChatFormatting.GREEN,
 				"Adds the next free Team N with an unused color.",
 				"At most " + MAX_TEAMS + " teams."),
 				(p, game, c) -> createTeam(p, game));

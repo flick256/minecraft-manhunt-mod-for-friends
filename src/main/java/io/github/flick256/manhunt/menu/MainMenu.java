@@ -10,6 +10,7 @@ import io.github.flick256.manhunt.util.TextUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
 
@@ -54,7 +55,7 @@ final class MainMenu extends GuiMenu {
 						refresh();
 					});
 		} else {
-			set(10, Icons.make(Items.GRAY_DYE, "Mode: " + kind + " (locked)", ChatFormatting.GRAY,
+			set(10, Icons.make(Blocks.WOOL.gray().asItem(), "Mode: " + kind + " (locked)", ChatFormatting.GRAY,
 					"Stop the game to change the mode."),
 					(p, game, c) -> Msg.send(p, Msg.bad("Stop the game before changing the mode.")));
 		}
@@ -75,7 +76,7 @@ final class MainMenu extends GuiMenu {
 					p -> Menus.openTeams(p));
 		}
 
-		set(16, Icons.make(Items.WHITE_BANNER, "Teams", ChatFormatting.WHITE,
+		set(16, Icons.make(Blocks.WOOL.white().asItem(), "Teams", ChatFormatting.WHITE,
 				roster.teams().size() + " teams", "Click to manage teams."),
 				p -> Menus.openTeams(p));
 
@@ -83,7 +84,7 @@ final class MainMenu extends GuiMenu {
 				"Pool, hunger, head start, math quiz, sharing.", "Click to open."),
 				p -> Menus.openSettings(p));
 
-		set(22, Icons.make(Items.LIME_CONCRETE, "START", ChatFormatting.GREEN,
+		set(22, Icons.make(Blocks.WOOL.lime().asItem(), "START", ChatFormatting.GREEN,
 				"Head start: " + TextUtil.secondsToClock(s.headStartSeconds),
 				hunters + " hunter(s), " + runners + " runner(s)",
 				"Click to start the hunt."),
@@ -98,7 +99,7 @@ final class MainMenu extends GuiMenu {
 					}
 				});
 
-		set(24, Icons.make(Items.RED_CONCRETE, "STOP", ChatFormatting.RED,
+		set(24, Icons.make(Blocks.WOOL.red().asItem(), "STOP", ChatFormatting.RED,
 				"Ends the game from any phase.", "Restores everybody and resets."),
 				(p, game, c) -> {
 					game.stop(true);

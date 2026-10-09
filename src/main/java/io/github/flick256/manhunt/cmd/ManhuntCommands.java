@@ -104,7 +104,7 @@ public final class ManhuntCommands {
 								.executes(usageOf("/manhunt team create <id> [name] [color]"))
 								.then(argument("id", StringArgumentType.word())
 										.executes(c -> teamCreate(c, null, null))
-										.then(argument("name", StringArgumentType.quotableString())
+										.then(argument("name", StringArgumentType.string())
 												.executes(c -> teamCreate(c, StringArgumentType.getString(c, "name"), null))
 												.then(argument("color", StringArgumentType.word())
 														.suggests(COLOR_SUGGESTIONS)
@@ -148,12 +148,12 @@ public final class ManhuntCommands {
 										.executes(ManhuntCommands::setStagger)))
 						.then(literal("mathquiz")
 								.executes(usageOf("/manhunt set mathquiz on|off [questions 1-10] [difficulty 1-3]"))
-								.then(literal("off").executes(c -> setMathQuiz(c, false, null, null)))
+								.then(literal("off").executes(c -> setMathQuiz(c, false, -1, -1)))
 								.then(literal("on")
-										.executes(c -> setMathQuiz(c, true, null, null))
+										.executes(c -> setMathQuiz(c, true, -1, -1))
 										.then(argument("questions", IntegerArgumentType.integer(1, 10))
 												.executes(c -> setMathQuiz(c, true,
-														IntegerArgumentType.getInteger(c, "questions"), null))
+														IntegerArgumentType.getInteger(c, "questions"), -1))
 												.then(argument("difficulty", IntegerArgumentType.integer(1, 3))
 														.executes(c -> setMathQuiz(c, true,
 																IntegerArgumentType.getInteger(c, "questions"),
@@ -487,7 +487,7 @@ public final class ManhuntCommands {
 		return 1;
 	}
 
-	private static int setMathQuiz(CommandContext<CommandSourceStack> c, boolean on, Integer questions, Integer difficulty) {
+	private static int setMathQuiz(CommandContext<CommandSourceStack> c, boolean on, int questions, int difficulty) {
 		CommandSourceStack src = c.getSource();
 		ManhuntGame g = ManhuntMod.game();
 		if (g == null) {
@@ -495,10 +495,10 @@ public final class ManhuntCommands {
 		}
 		Settings s = g.settings();
 		s.mathRespawn = on;
-		if (questions != null) {
+		if (questions >= 0) {
 			s.mathQuestions = questions;
 		}
-		if (difficulty != null) {
+		if (difficulty >= 0) {
 			s.mathDifficulty = difficulty;
 		}
 		s.clamp();

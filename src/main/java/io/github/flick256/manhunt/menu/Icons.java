@@ -8,6 +8,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.level.block.Blocks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +62,7 @@ final class Icons {
 
 	/** Blank gray pane used to fill empty slots. */
 	static ItemStack filler() {
-		return make(Items.GRAY_STAINED_GLASS_PANE, " ", ChatFormatting.GRAY);
+		return make(Blocks.WOOL.gray().asItem(), " ", ChatFormatting.GRAY);
 	}
 
 	/** Player head with the name (plain head: the skin is not resolved). */
@@ -73,19 +74,19 @@ final class Icons {
 	static Item woolFor(String chatColor) {
 		String c = chatColor == null ? "" : chatColor.toLowerCase(Locale.ROOT);
 		return switch (c) {
-			case "red", "dark_red" -> Items.RED_WOOL;
-			case "blue", "dark_blue" -> Items.BLUE_WOOL;
-			case "green" -> Items.LIME_WOOL;
-			case "dark_green" -> Items.GREEN_WOOL;
-			case "aqua", "dark_aqua" -> Items.CYAN_WOOL;
-			case "yellow" -> Items.YELLOW_WOOL;
-			case "light_purple", "pink" -> Items.PINK_WOOL;
-			case "dark_purple" -> Items.PURPLE_WOOL;
-			case "gold" -> Items.ORANGE_WOOL;
-			case "gray" -> Items.LIGHT_GRAY_WOOL;
-			case "dark_gray" -> Items.GRAY_WOOL;
-			case "black" -> Items.BLACK_WOOL;
-			default -> Items.WHITE_WOOL;
+			case "red", "dark_red" -> Blocks.WOOL.red().asItem();
+			case "blue", "dark_blue" -> Blocks.WOOL.blue().asItem();
+			case "green" -> Blocks.WOOL.lime().asItem();
+			case "dark_green" -> Blocks.WOOL.green().asItem();
+			case "aqua", "dark_aqua" -> Blocks.WOOL.cyan().asItem();
+			case "yellow" -> Blocks.WOOL.yellow().asItem();
+			case "light_purple", "pink" -> Blocks.WOOL.pink().asItem();
+			case "dark_purple" -> Blocks.WOOL.purple().asItem();
+			case "gold" -> Blocks.WOOL.orange().asItem();
+			case "gray" -> Blocks.WOOL.lightGray().asItem();
+			case "dark_gray" -> Blocks.WOOL.gray().asItem();
+			case "black" -> Blocks.WOOL.black().asItem();
+			default -> Blocks.WOOL.white().asItem();
 		};
 	}
 }

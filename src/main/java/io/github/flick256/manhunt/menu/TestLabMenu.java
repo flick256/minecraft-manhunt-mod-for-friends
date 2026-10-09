@@ -7,6 +7,7 @@ import io.github.flick256.manhunt.util.Msg;
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
 
 /**
  * Solo testing: a virtual teammate pool, fast timers, previews of the freeze, stagger and quiz, and
@@ -46,7 +47,7 @@ final class TestLabMenu extends GuiMenu {
 					refresh();
 				});
 
-		set(12, Icons.make(Items.RED_CONCRETE, "End solo test", ChatFormatting.RED,
+		set(12, Icons.make(Blocks.WOOL.red().asItem(), "End solo test", ChatFormatting.RED,
 				"Stops the game and clears test flags."),
 				(p, game, c) -> {
 					game.test().endSolo();
@@ -79,7 +80,7 @@ final class TestLabMenu extends GuiMenu {
 		set(23, Icons.make(Items.COOKED_BEEF, "Virtual hunger: drain 6", ChatFormatting.YELLOW,
 				"The shared pool loses 6 food points."),
 				(p, game, c) -> {
-					game.test().virtualHunger(6);
+					game.test().virtualHunger(p, 6);
 					Msg.send(p, Msg.info("Shared hunger drained by 6."));
 				});
 

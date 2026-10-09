@@ -3,6 +3,7 @@ package io.github.flick256.manhunt.util;
 import java.util.Locale;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket; // VERIFY: class + Component constructor (not in local reference)
@@ -61,9 +62,14 @@ public final class Msg {
 		player.connection.send(new ClientboundSetActionBarTextPacket(message));
 	}
 
-	/** Plays a sound at the player's position, audible only to that player. */
+	/** Plays a sound at the player's position (anyone standing right next to them hears it too). */
 	public static void sound(ServerPlayer player, SoundEvent sound, float volume, float pitch) {
-		player.playNotifySound(sound, SoundSource.MASTER, volume, pitch); // VERIFY: playNotifySound(SoundEvent, SoundSource, float, float) on ServerPlayer (not in local reference)
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), sound, SoundSource.PLAYERS, volume, pitch);
+	}
+
+	/** Same as above for sound constants that are registry holders in 26.2. */
+	public static void sound(ServerPlayer player, Holder<SoundEvent> sound, float volume, float pitch) {
+		sound(player, sound.value(), volume, pitch);
 	}
 
 	public static MutableComponent colored(String text, ChatFormatting fmt) {
