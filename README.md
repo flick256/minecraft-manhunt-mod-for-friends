@@ -40,7 +40,9 @@ Only **owners** can open the control panel and change the game. A player counts 
   for Fabric) can grant it.
 
 If `owners` is empty **and** no permission mod answers the check, the mod falls back to the vanilla
-`OWNERS` permission level (operators at level 4).
+`OWNERS` permission level (operators at level 4). Command blocks are never owners.
+
+On an `online-mode=false` server player names are not authenticated, so list UUIDs in `owners` instead of names.
 
 Everybody else can only use the player commands: `join`, `leave`, `answer`, `status`.
 
@@ -201,10 +203,10 @@ Owner commands are under `/manhunt`. The player commands are listed below as wel
 | Command | What it does |
 |---|---|
 | `/manhunt kind <classic\|teams>` | Switches the game kind (idle only) |
-| `/manhunt hunter <player>` | Makes a player a hunter (CLASSIC) |
-| `/manhunt runner <player> <team>` | Puts a player on a runner team |
-| `/manhunt unassign <player>` | Removes a player from any role |
-| `/manhunt team create <id> [display name] [color]` | Creates a team. The id uses `a-z 0-9 _ -`, up to 16 characters |
+| `/manhunt hunter <players>` | Makes the selected players hunters (CLASSIC) |
+| `/manhunt runner <players> [team]` | Puts players on a runner team. The team is optional in CLASSIC (it is `runners`) and required in TEAMS |
+| `/manhunt unassign <players>` | Removes players from any role |
+| `/manhunt team create <id> ["display name"] [color]` | Creates a team (TEAMS mode, at most 8 teams). The id uses `a-z 0-9 _ -`, up to 16 characters. Put the display name in quotes if it has spaces |
 | `/manhunt team remove <id>` | Removes a team (its members become unassigned) |
 | `/manhunt team auto <count>` | TEAMS: shuffles all online players into `count` teams (2 to 8) |
 | `/manhunt team list` | Lists the teams and their members |
@@ -216,26 +218,25 @@ Owner commands are under `/manhunt`. The player commands are listed below as wel
 | `/manhunt set hearts <n>` | 1 to 200, default 20 | Shared hearts per runner team |
 | `/manhunt set hunger <x>` | 1.0 to 8.0, default 2.0 | Hunger multiplier (drain is divided by this) |
 | `/manhunt set headstart <seconds>` | 0 to 3600, default 60 | Head start before the hunters are released |
-| `/manhunt set release <all\|staggered>` | default all | Release mode for the hunters |
+| `/manhunt set release all` / `set release staggered [seconds]` | default all | Release mode for the hunters (the optional seconds also set the stagger gap) |
 | `/manhunt set stagger <seconds>` | 1 to 600, default 60 | Gap between hunters when staggered |
-| `/manhunt set mathquiz <on\|off>` | default off | Math respawn for hunters |
-| `/manhunt set mathquiz questions <n>` | 1 to 10, default 1 | Correct answers needed to respawn |
-| `/manhunt set mathquiz difficulty <n>` | 1 to 3, default 1 | Difficulty of the math questions |
+| `/manhunt set mathquiz off` | default off | Turns the hunters' math respawn off |
+| `/manhunt set mathquiz on [questions 1-10] [difficulty 1-3]` | defaults 1 and 1 | Turns the math respawn on; questions = correct answers needed, difficulty = size of the numbers |
 
 ### Owners
 
 | Command | What it does |
 |---|---|
-| `/manhunt owner add <player>` | Adds a player to `owners` in the config |
-| `/manhunt owner remove <player>` | Removes a player from `owners` |
+| `/manhunt owner add <name or uuid>` | Adds an owner to `owners` in the config. Any owner can add or remove other owners; you cannot remove yourself |
+| `/manhunt owner remove <name or uuid>` | Removes an owner from `owners` |
 | `/manhunt owner list` | Lists the owners from the config |
 
 ### Player commands (for everybody)
 
 | Command | What it does |
 |---|---|
-| `/manhunt join <team>` | Joins a team while the game is idle (TEAMS, when self-select is on) |
-| `/manhunt leave` | Leaves your team while the game is idle |
+| `/manhunt join <team>` | Joins a team while the game is idle (when self-select is on). In CLASSIC only the `runners` team exists; hunters cannot switch themselves |
+| `/manhunt leave` | Leaves your team while the game is idle (not for hunters, and not when self-select is off) |
 | `/manhunt answer <number>` | Answers the current math question (same as typing the number in chat) |
 | `/manhunt status` | Shows the game status and your own role |
 
@@ -246,19 +247,21 @@ Owner commands are under `/manhunt`. The player commands are listed below as wel
 You can test almost everything in single-player, without friends. Open the Test Lab with `/manhunt test`
 (or *Test Lab* on the Main page).
 
-1. **Start solo.** You become the only runner. The mod adds a *virtual teammate* to your team, so the shared
-   bars are real. The game starts immediately, with no hunters needed.
+0. **Classic mode only.** Switch the Main page to CLASSIC first; the solo test refuses to run in TEAMS mode.
+1. **Start solo.** You become the only runner (your real inventory is kept). The buttons act as a *virtual
+   teammate* on your team's shared pool, so the shared bars are real. The game starts immediately, with no hunters
+   needed. The other buttons (freeze, quiz) need the solo test to be running; the ceremony previews work any time.
 2. **Damage / heal.** Lowers or raises the shared health. Watch the hearts change. Damage from the Test Lab is
    never lethal (it stops at 1 hp).
 3. **Hunger.** Drains the shared food bar, so you can see the hunger multiplier at work.
-4. **Virtual gear.** Puts a diamond sword, a diamond pickaxe, armor and golden carrots into the shared inventory,
+4. **Virtual gear.** Puts a diamond sword, a diamond pickaxe, armor, golden carrots and a shield into the shared inventory,
    so you can test the shared inventory.
 5. **Preview freeze.** Freezes you for a few seconds with a countdown on the action bar. Try to move, break
    a block or attack something.
 6. **Preview stagger.** Writes the release schedule for four fake hunters into chat, using your current
    head-start and release settings.
 7. **Quiz now.** Starts a math respawn question for you. Answer in chat or with `/manhunt answer <n>`.
-8. **Ceremony.** Plays the victory ceremony as a runner win or a hunter win.
+8. **Ceremony.** Plays the victory ceremony as a runner win, a hunter win or a team win.
 9. **Fast timers.** Scales the game timers down to 10 percent of their normal length, for quick testing.
 10. **End solo.** Stops the test game and restores everybody to normal.
 
