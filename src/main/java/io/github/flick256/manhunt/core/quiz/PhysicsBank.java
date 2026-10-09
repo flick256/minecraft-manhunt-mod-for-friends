@@ -39,7 +39,7 @@ public final class PhysicsBank {
         q.add(Question.mcq(t, "The SI unit of energy is the:",
                 "Joule (J)", "Newton (N)", "Watt (W)", "Pascal (Pa)"));
         q.add(Question.mcq(t, "Work done by a force is calculated as:",
-                "W = F x d (in the direction of the force)", "W = F / d", "W = ma", "W = mv"));
+                "W = F x d (force x distance moved)", "W = F / d", "W = ma", "W = mv"));
         q.add(Question.mcq(t, "Momentum of an object is calculated as:",
                 "p = mv", "p = ma", "p = m/v", "p = 1/2 mv^2"));
         q.add(Question.mcq(t, "In a collision with no external forces, the total momentum:",
@@ -58,7 +58,7 @@ public final class PhysicsBank {
         q.add(Question.mcq(t, "Two positive charges placed near each other will:",
                 "Repel each other", "Attract each other", "Not interact at all", "Spin around each other"));
         q.add(Question.mcq(t, "Electric field lines point:",
-                "From positive charges towards negative charges", "From negative towards positive charges",
+                "From positive towards negative charges", "From negative towards positive charges",
                 "In circles around the charge", "Only into the charge"));
         q.add(Question.mcq(t, "The electric force between two charges gets stronger when they are:",
                 "Closer together", "Further apart", "Both neutral", "Moved sideways only"));
@@ -160,7 +160,7 @@ public final class PhysicsBank {
                 "A magnetic field only", "A stationary charge"));
         q.add(Question.mcq(t, "In the photoelectric effect, no electrons are emitted when light frequency is:",
                 "Below the threshold frequency", "Above the threshold frequency",
-                "Any frequency if the light is bright enough", "Always zero"));
+                "Any frequency if bright enough", "Always zero"));
         q.add(Question.mcq(t, "Photon energy is calculated using:",
                 "E = hf", "E = mc^2", "E = h / f", "E = f / h"));
         q.add(Question.mcq(t, "A particle of light is called a:",
