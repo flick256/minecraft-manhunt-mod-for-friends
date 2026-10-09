@@ -39,7 +39,7 @@ public final class PhysicsBank {
         q.add(Question.mcq(t, "The SI unit of energy is the:",
                 "Joule (J)", "Newton (N)", "Watt (W)", "Pascal (Pa)"));
         q.add(Question.mcq(t, "Work done by a force is calculated as:",
-                "W = F x d (force x distance moved)", "W = F / d", "W = ma", "W = mv"));
+                "W = F x d", "W = F / d", "W = ma", "W = mv"));
         q.add(Question.mcq(t, "Momentum of an object is calculated as:",
                 "p = mv", "p = ma", "p = m/v", "p = 1/2 mv^2"));
         q.add(Question.mcq(t, "In a collision with no external forces, the total momentum:",
@@ -52,7 +52,7 @@ public final class PhysicsBank {
         q.add(Question.mcq(t, "Acceleration is the rate of change of:",
                 "Velocity", "Displacement", "Mass", "Energy"));
         q.add(Question.mcq(t, "Compared with its weight on Earth, an object's weight on the Moon is:",
-                "Less (the Moon's gravity is weaker)", "Greater", "Exactly the same", "Zero"));
+                "Less", "Greater", "Exactly the same", "Zero"));
 
         // Unit 3: electric and magnetic fields
         q.add(Question.mcq(t, "Two positive charges placed near each other will:",
@@ -185,8 +185,8 @@ public final class PhysicsBank {
         q.add(Question.mcq(t, "In E = mc^2, what does c represent?",
                 "The speed of light in a vacuum", "The speed of sound",
                 "The charge of an electron", "Half the speed of light"));
-        q.add(Question.mcq(t, "Rest mass-energy comes from an object's:",
-                "Mass (E = mc^2)", "Speed", "Temperature", "Electric charge"));
+        q.add(Question.mcq(t, "An object's rest energy is related to its:",
+                "Mass", "Speed", "Temperature", "Electric charge"));
         q.add(Question.mcq(t, "Which can travel at exactly the speed of light in a vacuum?",
                 "A photon", "A baseball", "A car", "An electron"));
 

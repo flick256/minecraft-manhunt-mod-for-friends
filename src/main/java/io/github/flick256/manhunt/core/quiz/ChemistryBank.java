@@ -42,7 +42,7 @@ public final class ChemistryBank {
         q.add(Question.mcq(Topic.CHEMISTRY, "What is the main purpose of the salt bridge in a galvanic cell?",
                 "To let ions flow and close the circuit", "To carry electrons between electrodes",
                 "To supply oxygen to the cathode", "To heat the electrolyte"));
-        q.add(Question.mcq(Topic.CHEMISTRY, "Which metal is most easily oxidised: copper, magnesium or silver?",
+        q.add(Question.mcq(Topic.CHEMISTRY, "Which metal is most easily oxidised: copper, magnesium, silver or gold?",
                 "Magnesium", "Copper", "Silver", "Gold"));
         q.add(Question.mcq(Topic.CHEMISTRY, "Which halogen is the strongest oxidising agent?",
                 "Fluorine", "Chlorine", "Bromine", "Iodine"));
@@ -79,7 +79,7 @@ public final class ChemistryBank {
                 "Only the forward reaction occurs", "Concentrations are all zero"));
         q.add(Question.mcq(Topic.CHEMISTRY, "For an exothermic reaction at equilibrium, raising the temperature shifts the position towards",
                 "The reactants", "The products", "No shift occurs", "The catalyst"));
-        q.add(Question.mcq(Topic.CHEMISTRY, "Increasing pressure shifts a gas equilibrium towards the side with what?",
+        q.add(Question.mcq(Topic.CHEMISTRY, "If the gas amounts differ either side, higher pressure shifts equilibrium to the side with:",
                 "Fewer gas molecules", "More gas molecules", "Liquid molecules only", "No gas molecules"));
         q.add(Question.mcq(Topic.CHEMISTRY, "The value of the equilibrium constant K changes only if what changes?",
                 "Temperature", "Catalyst", "Pressure", "Concentration"));

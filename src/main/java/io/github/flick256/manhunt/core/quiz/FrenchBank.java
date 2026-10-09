@@ -124,7 +124,7 @@ public final class FrenchBank {
         q.add(mcq(t, "Complétez: Hier, nous ___ le film. (voir, passé composé)", "avons vu", "sommes vus", "avons voir", "ont vu"));
         q.add(mcq(t, "Complétez: Hier, Julie ___ un livre. (lire, passé composé)", "a lu", "est lu", "a lire", "a lit"));
         q.add(mcq(t, "Complétez: Hier, Sophie ___ au marché. (aller, passé composé)", "est allée", "est allé", "a allé", "sont allées"));
-        q.add(mcq(t, "Complétez: Hier, Marc ___ à l'école. (aller, passé composé)", "est allé", "est allée", "a été", "a allé"));
+        q.add(mcq(t, "Complétez: Hier, Marc ___ à l'école. (aller, passé composé)", "est allé", "est allée", "sont allés", "a allé"));
         q.add(mcq(t, "Complétez: Hier, Chloé ___ à la maison. (rentrer, passé composé)", "est rentrée", "est rentré", "a rentré", "est rentrés"));
         q.add(mcq(t, "Complétez: Hier, nous ___ un gâteau. (faire, passé composé)", "avons fait", "sommes faits", "avons faire", "ont fait"));
 
@@ -154,9 +154,9 @@ public final class FrenchBank {
         q.add(mcq(t, "Complétez: Les garçons sont ___. (grand)", "grands", "grand", "grande", "grandes"));
 
         // Possessives
-        q.add(mcq(t, "Complétez: ___ père est sympa.", "Mon", "Ma", "Mes", "Ton"));
-        q.add(mcq(t, "Complétez: ___ mère est gentille.", "Ma", "Mon", "Mes", "Ta"));
-        q.add(mcq(t, "Complétez: ___ amis sont très gentils.", "Mes", "Mon", "Ma", "Ses"));
+        q.add(mcq(t, "Complétez (my): ___ père est sympa.", "Mon", "Ma", "Mes", "Ton"));
+        q.add(mcq(t, "Complétez (my): ___ mère est gentille.", "Ma", "Mon", "Mes", "Ta"));
+        q.add(mcq(t, "Complétez (my): ___ amis sont très gentils.", "Mes", "Mon", "Ma", "Ses"));
 
         // Negation
         q.add(mcq(t, "Which is the negative of \"Je parle français\"?", "Je ne parle pas français",
