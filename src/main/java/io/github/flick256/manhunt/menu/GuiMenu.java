@@ -54,7 +54,8 @@ public abstract class GuiMenu extends AbstractContainerMenu {
 	private final Action[] actions = new Action[SIZE];
 
 	protected GuiMenu(int containerId, Inventory inventory) {
-		// VERIFY: AbstractContainerMenu(MenuType<?>, int) constructor (classic, used by every vanilla menu).
+		// VERIFY: AbstractContainerMenu(MenuType<?>, int) constructor and MenuType.GENERIC_9x6 field name
+		// (neither appears in the reference tree; the test mod only subclasses DispenserMenu).
 		super(MenuType.GENERIC_9x6, containerId);
 		// Same slot layout as vanilla ChestMenu with 6 rows, so the vanilla client screen lines up.
 		for (int row = 0; row < ROWS; row++) {
@@ -136,6 +137,7 @@ public abstract class GuiMenu extends AbstractContainerMenu {
 		if (slotId < 0 || slotId >= SIZE) {
 			return;
 		}
+		// VERIFY: ContainerInput constants PICKUP and QUICK_MOVE (ClickType renamed; names not in reference tree).
 		if (containerInput != ContainerInput.PICKUP && containerInput != ContainerInput.QUICK_MOVE) {
 			return;
 		}
