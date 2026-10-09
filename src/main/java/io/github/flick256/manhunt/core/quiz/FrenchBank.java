@@ -166,7 +166,6 @@ public final class FrenchBank {
         // Question words
         q.add(mcq(t, "What does \"où\" mean?", "where", "who", "when", "why"));
         q.add(mcq(t, "What does \"pourquoi\" mean?", "why", "how", "what", "who"));
-        q.add(mcq(t, "What does \"combien\" mean?", "how much / how many", "when", "where", "who"));
         q.add(mcq(t, "What does \"quand\" mean?", "when", "where", "why", "how"));
 
         // Prepositions
