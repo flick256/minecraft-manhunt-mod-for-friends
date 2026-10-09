@@ -13,7 +13,7 @@ public final class HistoryBank {
         List<Question> q = new ArrayList<>();
 
         // French Revolution
-        q.add(Question.mcq(HISTORY, "Which assembly did King Louis XVI summon in 1789, helping to trigger the French Revolution?",
+        q.add(Question.mcq(HISTORY, "Which assembly did King Louis XVI convene in May 1789, helping to trigger the French Revolution?",
                 "The Estates-General", "The Reichstag", "The Diet of Worms", "The Duma"));
         q.add(Question.mcq(HISTORY, "Which estate in pre-revolutionary France was made up of the common people?",
                 "The Third Estate", "The First Estate", "The Second Estate", "The Fourth Estate"));
@@ -28,7 +28,7 @@ public final class HistoryBank {
                 "Louis XVI", "Louis XIV", "Napoleon III", "Henry IV"));
         q.add(Question.mcq(HISTORY, "Marie Antoinette was the queen consort of which French king?",
                 "Louis XVI", "Louis XIV", "Charles X", "Henry IV"));
-        q.add(Question.mcq(HISTORY, "Which radical political club, led by Robespierre, was central to the Reign of Terror?",
+        q.add(Question.mcq(HISTORY, "Which radical political club was central to the Reign of Terror?",
                 "The Jacobins", "The Bonapartists", "The Hanoverians", "The Whigs"));
         q.add(Question.mcq(HISTORY, "Which Jacobin leader became the most powerful figure of the Reign of Terror?",
                 "Maximilien Robespierre", "Napoleon Bonaparte", "Marquis de Lafayette", "Louis XVI"));
@@ -40,7 +40,7 @@ public final class HistoryBank {
                 "1799", "1789", "1812", "1815"));
         q.add(Question.mcq(HISTORY, "In what year did Napoleon crown himself Emperor of the French?",
                 "1804", "1799", "1815", "1821"));
-        q.add(Question.mcq(HISTORY, "Before 1789, what did the term 'Ancien Regime' describe in France?",
+        q.add(Question.mcq(HISTORY, "Before 1789, what did the term 'Ancien Régime' describe in France?",
                 "Absolute monarchy and privilege", "A republic run by elected deputies",
                 "Napoleon's imperial government", "Rule by the Roman Senate"));
         q.add(Question.mcq(HISTORY, "In what year was King Louis XVI executed by guillotine?",
@@ -65,8 +65,6 @@ public final class HistoryBank {
                 "The Red Army", "The White Army", "Imperial Russian Guard", "Ottoman Army"));
         q.add(Question.mcq(HISTORY, "In the Russian Civil War, which side was led by the Bolsheviks?",
                 "The Reds", "The Whites", "The Blues", "The Blacks"));
-        q.add(Question.mcq(HISTORY, "The name Bolshevik comes from a Russian word meaning what?",
-                "Majority", "Revolution", "Workers", "Freedom"));
         q.add(Question.mcq(HISTORY, "Which Soviet policy during the Civil War seized grain from peasants?",
                 "War Communism", "Marshall Plan", "Truman Doctrine", "Dawes Plan"));
         q.add(Question.mcq(HISTORY, "In what year did Lenin introduce the New Economic Policy (NEP)?",
@@ -75,7 +73,7 @@ public final class HistoryBank {
                 "Joseph Stalin", "Alexander Kerensky", "Nicholas II", "Mikhail Gorbachev"));
 
         // Chinese Revolution
-        q.add(Question.mcq(HISTORY, "In what year did the Qing dynasty fall in China?",
+        q.add(Question.mcq(HISTORY, "In what year did the Xinhai Revolution begin, overthrowing the Qing dynasty?",
                 "1911", "1905", "1927", "1949"));
         q.add(Question.mcq(HISTORY, "Who is regarded as the founding father of the Republic of China?",
                 "Sun Yat-sen", "Mao Zedong", "Chiang Kai-shek", "Deng Xiaoping"));
@@ -102,7 +100,7 @@ public final class HistoryBank {
         q.add(Question.mcq(HISTORY, "In what year was the Boston Tea Party held?",
                 "1773", "1765", "1776", "1783"));
         q.add(Question.mcq(HISTORY, "The slogan 'No taxation without representation' protested against what?",
-                "Taxes set without colonial votes", "Limits on western land purchase",
+                "Taxes with no colonial representation", "Limits on western land purchase",
                 "Ban on colonial churches", "Forced service in British army"));
         q.add(Question.mcq(HISTORY, "In what year was the Declaration of Independence adopted?",
                 "1776", "1773", "1783", "1789"));

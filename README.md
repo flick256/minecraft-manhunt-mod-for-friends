@@ -56,7 +56,7 @@ That fits this mod:
   a Fabric 26.2 build). The mod runs inside the host's world.
 * The host is automatically the **owner** (the first player to join their own integrated server). Friends who join
   through Essential are not owners, so only the host gets the control panel and the commands. Friends can still use
-  `/manhunt join <team>`, `/manhunt leave`, `/manhunt answer <n>` and `/manhunt status`.
+  `/manhunt join <team>`, `/manhunt leave`, `/manhunt answer <n>`, `/manhunt topic <subject>` and `/manhunt status`.
 * Friends do not need this mod, because all the logic and the menus run on the host. They only need whatever
   Essential needs to join. Installing it on their side as well does no harm.
 * Cheats do not need to be on: the mod checks ownership itself.
@@ -177,11 +177,33 @@ Hunters (CLASSIC) and every player (TEAMS) receive a **Runner Tracker** compass 
 
 With `mathRespawn` on, a hunter who dies does not get back into the hunt straight away. They respawn, but they are
 **frozen in place, blinded and cannot interact** (not in spectator mode, so they cannot fly around and scout the
-runners; dying is a real cost). They get math questions instead, and must answer `mathQuestions` questions correctly
+runners; dying is a real cost). They get quiz questions instead, and must answer `mathQuestions` questions correctly
 (1 to 10) before they can move and see again.
-Difficulty is `mathDifficulty` (1 to 3).
 
-* Answer in chat, or with `/manhunt answer <number>`.
+### Subjects
+
+The owner chooses which **subjects** are allowed (Settings -> *Quiz subjects*, or `/manhunt set topics <subject> <on|off>`;
+at least one must stay on). A dying hunter **picks one of the allowed subjects** by typing its name or number in chat (or
+`/manhunt topic <subject>`), and can type another subject name at any time to switch. If only one subject is on, it is
+used automatically.
+
+| Subject (`id`) | What it asks |
+|---|---|
+| Math (`math`) | Mental arithmetic. `mathDifficulty` (1 to 3) sets the size of the numbers |
+| Maths Methods (`methods`) | Easy VCE Mathematical Methods Units 3&4: gradients, solving, indices and logs, simple derivatives and integrals, probability, binomial mean, normal 68/95/99.7 (generated, with exact answers) |
+| Biology (`biology`) | Easy VCE Biology Units 3&4 recall: DNA/proteins, enzymes, photosynthesis and respiration, immunity, PCR/CRISPR, evolution |
+| Chemistry (`chemistry`) | Easy VCE Chemistry Units 3&4 recall: fuels, galvanic cells and electrolysis, rates and equilibrium, acids/bases, organic chemistry, analysis, the mole |
+| Physics (`physics`) | Easy VCE Physics Units 3&4 recall: forces and fields, induction and electricity, waves and light, the photoelectric effect, special relativity |
+| History (`history`) | Easy VCE History recall: the French, Russian, Chinese and American revolutions, plus a few Australian history items |
+| French (`french`) | Easy VCE-level French vocabulary and grammar: verbs, passe compose, articles, adjectives, everyday words |
+
+The questions are written to follow the VCAA study design areas for Year 12 at an *easy* level. They are multiple choice
+(type **A, B, C or D**), except Math and Methods, which want a number (fractions like `3/4` are accepted). The banks
+hold 60 to 110 questions per subject and the question never repeats twice in a row. They were checked by a second pass,
+but they are not an official VCAA product: if you spot a wrong or unclear question, tell me and it will be fixed.
+
+* Answer in chat, or with `/manhunt answer <letter or number>`. Chat that is not an answer is treated as normal chat.
+* A wrong answer gives a new question; a right one counts toward `mathQuestions`.
 * The question is repeated on the action bar every few seconds.
 
 ---
@@ -236,7 +258,9 @@ Owner commands are under `/manhunt`. The player commands are listed below as wel
 | `/manhunt set release all` / `set release staggered [seconds]` | default all | Release mode for the hunters (the optional seconds also set the stagger gap) |
 | `/manhunt set stagger <seconds>` | 1 to 600, default 60 | Gap between hunters when staggered |
 | `/manhunt set mathquiz off` | default off | Turns the hunters' math respawn off |
-| `/manhunt set mathquiz on [questions 1-10] [difficulty 1-3]` | defaults 1 and 1 | Turns the math respawn on; questions = correct answers needed, difficulty = size of the numbers |
+| `/manhunt set mathquiz on [questions 1-10] [difficulty 1-3]` | defaults 1 and 1 | Turns the respawn quiz on; questions = correct answers needed, difficulty = size of the numbers (Math subject) |
+| `/manhunt set topics` | default math | Lists the enabled subjects |
+| `/manhunt set topics <subject> <on\|off>` | subjects: math, methods, biology, chemistry, physics, history, french | Allows or blocks a subject for the respawn quiz |
 
 ### Owners
 
@@ -252,7 +276,8 @@ Owner commands are under `/manhunt`. The player commands are listed below as wel
 |---|---|
 | `/manhunt join <team>` | Joins a team while the game is idle (when self-select is on). In CLASSIC only the `runners` team exists; hunters cannot switch themselves |
 | `/manhunt leave` | Leaves your team while the game is idle (not for hunters, and not when self-select is off) |
-| `/manhunt answer <number>` | Answers the current math question (same as typing the number in chat) |
+| `/manhunt answer <letter or number>` | Answers your current respawn question (same as typing it in chat) |
+| `/manhunt topic <subject>` | Picks (or switches) the subject of your respawn quiz |
 | `/manhunt status` | Shows the game status and your own role |
 
 ---
@@ -275,7 +300,7 @@ You can test almost everything in single-player, without friends. Open the Test 
    a block or attack something.
 6. **Preview stagger.** Writes the release schedule for four fake hunters into chat, using your current
    head-start and release settings.
-7. **Quiz now.** Starts a math respawn question for you. Answer in chat or with `/manhunt answer <n>`.
+7. **Quiz now.** Starts the respawn quiz for you (pick a subject if several are on). Answer in chat or with `/manhunt answer <n>`.
 8. **Ceremony.** Plays the victory ceremony as a runner win, a hunter win or a team win.
 9. **Fast timers.** Scales the game timers down to 10 percent of their normal length, for quick testing.
 10. **End solo.** Stops the test game and restores everybody to normal.

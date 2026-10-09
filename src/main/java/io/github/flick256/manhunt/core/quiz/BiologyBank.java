@@ -95,15 +95,15 @@ public final class BiologyBank {
                 "Antibodies", "Antigens", "Platelets", "Red blood cells"));
         q.add(Question.mcq(Topic.BIOLOGY, "Which immune cells directly destroy body cells infected by a virus?",
                 "Cytotoxic T cells", "B cells", "Red blood cells", "Platelets"));
-        q.add(Question.mcq(Topic.BIOLOGY, "What is the main role of memory cells?",
-                "Faster response to a repeat infection", "Carry oxygen around the body",
+        q.add(Question.mcq(Topic.BIOLOGY, "What do memory cells do?",
+                "Give a faster response to a repeat infection", "Carry oxygen around the body",
                 "Produce insulin in the pancreas", "Clot blood after a cut"));
-        q.add(Question.mcq(Topic.BIOLOGY, "What is the purpose of a vaccine?",
+        q.add(Question.mcq(Topic.BIOLOGY, "What does a vaccine do?",
                 "Trains the immune system safely", "Kills the pathogen directly",
                 "Replaces damaged white blood cells", "Cures an infection already present"));
         q.add(Question.mcq(Topic.BIOLOGY, "Which of these pathogens is a virus?",
                 "Influenza virus", "Staphylococcus aureus", "Candida albicans", "Giardia"));
-        q.add(Question.mcq(Topic.BIOLOGY, "What is the main role of helper T cells?",
+        q.add(Question.mcq(Topic.BIOLOGY, "What do helper T cells do?",
                 "Activate other immune cells", "Produce red blood cells", "Store fat in the liver",
                 "Digest food in the stomach"));
 
@@ -126,7 +126,7 @@ public final class BiologyBank {
                 "Cuts DNA at the target site", "Makes mRNA from a DNA template",
                 "Separates DNA fragments by size", "Carries amino acids to ribosomes"));
         q.add(Question.mcq(Topic.BIOLOGY, "What is a genetically modified organism (GMO)?",
-                "Organism with DNA altered by humans", "An organism that cannot reproduce",
+                "An organism whose DNA humans altered", "An organism that cannot reproduce",
                 "An organism living in extreme heat", "An organism that has lost all its DNA"));
         q.add(Question.mcq(Topic.BIOLOGY, "What is recombinant DNA?",
                 "DNA made by joining DNA from two sources", "DNA that has lost its bases",
