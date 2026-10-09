@@ -44,7 +44,11 @@ class QuizBankTest {
             for (int i = 0; i < 300; i++) {
                 Question q = QuizBank.next(t, 2, r, null);
                 assertEquals(t, q.topic());
-                assertTrue(q.check(q.correct()), t + ": " + q.display());
+                // Letters always win over text, so a one-character answer text such as "a" (French "il a") is only
+                // reliably gradable by its option letter; every other answer text must also work when typed.
+                if (!q.isMultipleChoice() || q.correct().trim().length() > 1) {
+                    assertTrue(q.check(q.correct()), t + ": " + q.display());
+                }
                 if (q.isMultipleChoice()) {
                     int idx = q.choices().indexOf(q.correct());
                     assertTrue(q.check(String.valueOf((char) ('A' + idx))));

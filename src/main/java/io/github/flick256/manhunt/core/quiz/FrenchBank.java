@@ -98,7 +98,7 @@ public final class FrenchBank {
         // Verbs: avoir, aller, faire, être, vouloir, pouvoir
         q.add(mcq(t, "Complétez: Tu ___ au cinéma ce soir? (aller)", "vas", "vais", "va", "allons"));
         q.add(mcq(t, "Complétez: Nous ___ faim. (avoir)", "avons", "ai", "avez", "ont"));
-        q.add(mcq(t, "Complétez: Mon frère ___ dix-sept ans. (avoir)", "a", "ai", "as", "ont"));
+        q.add(mcq(t, "Complétez: Mon frère et moi ___ un chien. (avoir)", "avons", "ai", "avez", "ont"));
         q.add(mcq(t, "Complétez: Mes parents ___ une maison. (avoir)", "ont", "a", "avons", "avez"));
         q.add(mcq(t, "Complétez: Vous ___ un chien? (avoir)", "avez", "ont", "avons", "as"));
         q.add(mcq(t, "Complétez: Nous ___ du sport. (faire)", "faisons", "faites", "font", "fais"));
@@ -172,7 +172,7 @@ public final class FrenchBank {
         // Prepositions
         q.add(mcq(t, "What does \"sur\" mean?", "on", "under", "in", "behind"));
         q.add(mcq(t, "What does \"sous\" mean?", "under", "on", "in", "behind"));
-        q.add(mcq(t, "Complétez: Je vais ___ Paris. (à)", "à", "en", "au", "de"));
+        q.add(mcq(t, "Complétez: Je vais ___ cinéma. (à)", "au", "à la", "à l'", "du"));
         q.add(mcq(t, "Complétez: Je vais ___ école. (à)", "à l'", "au", "à la", "de l'"));
 
         // French-speaking world
