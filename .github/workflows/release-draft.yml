@@ -1,6 +1,7 @@
 name: draft-release
 # Builds the mod and attaches the jar to a DRAFT release (only visible to people with access to the repo).
 # Runs when this file changes on the feature branch, or manually from the Actions tab.
+# (Touch this file to publish a fresh draft with the latest build.)
 on:
   push:
     branches: [claude/trusting-shannon-kaydpp]
