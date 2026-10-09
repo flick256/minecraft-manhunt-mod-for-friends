@@ -36,6 +36,7 @@ import io.github.flick256.manhunt.core.Role;
 import io.github.flick256.manhunt.core.Roster;
 import io.github.flick256.manhunt.core.Settings;
 import io.github.flick256.manhunt.core.TeamInfo;
+import io.github.flick256.manhunt.core.quiz.Topic;
 import io.github.flick256.manhunt.game.ManhuntGame;
 import io.github.flick256.manhunt.menu.Menus;
 import io.github.flick256.manhunt.util.Msg;
@@ -47,6 +48,14 @@ public final class ManhuntCommands {
 	private static final String NOT_READY = "Manhunt is not ready yet";
 
 	private static final Predicate<CommandSourceStack> OWNER = src -> Owner.isOwner(src);
+
+	private static final SuggestionProvider<CommandSourceStack> TOPIC_SUGGESTIONS = (ctx, builder) -> {
+		List<String> ids = new ArrayList<>();
+		for (Topic t : Topic.values()) {
+			ids.add(t.id());
+		}
+		return SharedSuggestionProvider.suggest(ids, builder);
+	};
 
 	/** Colors handed out automatically by "team create" (same palette the roster uses for auto teams). */
 	private static final List<String> TEAM_PALETTE = List.of("red", "blue", "green", "yellow", "aqua", "pink", "gold", "white");
@@ -122,7 +131,7 @@ public final class ManhuntCommands {
 						.then(literal("list").executes(ManhuntCommands::teamList)))
 				// ---- owner: settings
 				.then(literal("set").requires(OWNER)
-						.executes(usageOf("/manhunt set hearts|hunger|headstart|release|stagger|mathquiz ..."))
+						.executes(usageOf("/manhunt set hearts|hunger|headstart|release|stagger|mathquiz|topics ..."))
 						.then(literal("hearts")
 								.executes(usageOf("/manhunt set hearts <1-200>"))
 								.then(argument("value", IntegerArgumentType.integer(1, 200))
@@ -157,7 +166,14 @@ public final class ManhuntCommands {
 												.then(argument("difficulty", IntegerArgumentType.integer(1, 3))
 														.executes(c -> setMathQuiz(c, true,
 																IntegerArgumentType.getInteger(c, "questions"),
-																IntegerArgumentType.getInteger(c, "difficulty"))))))))
+																IntegerArgumentType.getInteger(c, "difficulty")))))))
+						.then(literal("topics")
+								.executes(ManhuntCommands::topicsList)
+								.then(argument("topic", StringArgumentType.word())
+										.suggests(TOPIC_SUGGESTIONS)
+										.executes(usageOf("/manhunt set topics <topic> <on|off>"))
+										.then(literal("on").executes(c -> setTopic(c, true)))
+										.then(literal("off").executes(c -> setTopic(c, false))))))
 				// ---- owner: owner list
 				.then(literal("owner").requires(OWNER)
 						.executes(usageOf("/manhunt owner add|remove <name> | owner list"))
@@ -181,9 +197,14 @@ public final class ManhuntCommands {
 								.executes(ManhuntCommands::join)))
 				.then(literal("leave").executes(ManhuntCommands::leave))
 				.then(literal("answer")
-						.executes(usageOf("/manhunt answer <number>"))
+						.executes(usageOf("/manhunt answer <letter or number>"))
 						.then(argument("answer", StringArgumentType.greedyString())
-								.executes(ManhuntCommands::answer)));
+								.executes(ManhuntCommands::answer)))
+				.then(literal("topic")
+						.executes(usageOf("/manhunt topic <subject>"))
+						.then(argument("subject", StringArgumentType.greedyString())
+								.suggests(TOPIC_SUGGESTIONS)
+								.executes(ManhuntCommands::pickTopic)));
 	}
 
 	// ------------------------------------------------------------------ root / help
@@ -207,7 +228,8 @@ public final class ManhuntCommands {
 		infoMsg(src, "  /manhunt status - phase, teams and your role");
 		infoMsg(src, "  /manhunt join <team> - join a team while idle (teams mode)");
 		infoMsg(src, "  /manhunt leave - leave your team while idle");
-		infoMsg(src, "  /manhunt answer <number> - answer your respawn math question");
+		infoMsg(src, "  /manhunt answer <letter or number> - answer your respawn question");
+		infoMsg(src, "  /manhunt topic <subject> - pick the subject of your respawn quiz");
 		if (Owner.isOwner(src)) {
 			infoMsg(src, "Owner: /manhunt menu (GUI), start, stop, hunter, runner, unassign, kind, team, set, owner, test");
 		}
@@ -683,9 +705,74 @@ public final class ManhuntCommands {
 			return fail(src, "Only a player can answer a math question");
 		}
 		String text = StringArgumentType.getString(c, "answer");
-		if (!g.quiz().handleAnswer(p, text)) {
-			return fail(src, "You have no math question to answer right now.");
+		if (!g.quiz().handleCommand(p, text)) {
+			return fail(src, "You have no respawn question to answer right now.");
 		}
+		return 1;
+	}
+
+	private static int pickTopic(CommandContext<CommandSourceStack> c) {
+		CommandSourceStack src = c.getSource();
+		ManhuntGame g = ManhuntMod.game();
+		if (g == null) {
+			return fail(src, NOT_READY);
+		}
+		ServerPlayer p = src.getPlayer();
+		if (p == null) {
+			return fail(src, "Only a player can pick a respawn subject");
+		}
+		if (!g.quiz().handleCommand(p, StringArgumentType.getString(c, "subject"))) {
+			return fail(src, "You are not in a respawn quiz right now.");
+		}
+		return 1;
+	}
+
+	private static String subjectIds(Settings s) {
+		StringBuilder sb = new StringBuilder();
+		for (Topic t : s.enabledTopics()) {
+			if (sb.length() > 0) sb.append("/");
+			sb.append(t.id());
+		}
+		return sb.toString();
+	}
+
+	private static int topicsList(CommandContext<CommandSourceStack> c) {
+		CommandSourceStack src = c.getSource();
+		ManhuntGame g = ManhuntMod.game();
+		if (g == null) {
+			return fail(src, NOT_READY);
+		}
+		StringBuilder on = new StringBuilder();
+		for (Topic t : g.settings().enabledTopics()) {
+			if (on.length() > 0) on.append(", ");
+			on.append(t.id());
+		}
+		infoMsg(src, "Respawn quiz subjects ON: " + on);
+		StringBuilder all = new StringBuilder();
+		for (Topic t : Topic.values()) {
+			if (all.length() > 0) all.append(", ");
+			all.append(t.id());
+		}
+		infoMsg(src, "All subjects: " + all + ". Change with /manhunt set topics <subject> <on|off>");
+		return 1;
+	}
+
+	private static int setTopic(CommandContext<CommandSourceStack> c, boolean on) {
+		CommandSourceStack src = c.getSource();
+		ManhuntGame g = ManhuntMod.game();
+		if (g == null) {
+			return fail(src, NOT_READY);
+		}
+		Topic t = Topic.parse(StringArgumentType.getString(c, "topic"));
+		if (t == null) {
+			return fail(src, "Unknown subject. Use one of: math, methods, biology, chemistry, physics, history, french.");
+		}
+		boolean now = g.settings().setTopic(t, on);
+		g.save();
+		if (on != now) {
+			return fail(src, "At least one subject must stay on.");
+		}
+		okMsg(src, t.display() + " is now " + (now ? "ON" : "OFF") + " for the respawn quiz.");
 		return 1;
 	}
 
@@ -746,7 +833,7 @@ public final class ManhuntCommands {
 				+ " | hunger x" + String.format(Locale.ROOT, "%.1f", s.hungerMultiplier)
 				+ " | head start " + s.headStartSeconds + "s"
 				+ " | release " + (s.releaseMode == ReleaseMode.ALL_AT_ONCE ? "all" : "staggered " + s.staggerSeconds + "s")
-				+ " | math quiz " + (s.mathRespawn ? s.mathQuestions + " question(s), difficulty " + s.mathDifficulty : "off");
+				+ " | math quiz " + (s.mathRespawn ? s.mathQuestions + " question(s), difficulty " + s.mathDifficulty + ", subjects " + subjectIds(s) : "off");
 	}
 
 	private static void okMsg(CommandSourceStack src, String text) {

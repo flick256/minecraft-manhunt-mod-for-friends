@@ -2,6 +2,7 @@ package io.github.flick256.manhunt.menu;
 
 import io.github.flick256.manhunt.core.ReleaseMode;
 import io.github.flick256.manhunt.core.Settings;
+import io.github.flick256.manhunt.core.quiz.Topic;
 import io.github.flick256.manhunt.game.ManhuntGame;
 import io.github.flick256.manhunt.util.TextUtil;
 import net.minecraft.ChatFormatting;
@@ -9,6 +10,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Items;
 
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 /**
  * Every {@link Settings} field, editable by click. Left click increases, right click decreases,
@@ -129,6 +131,12 @@ final class SettingsMenu extends GuiMenu {
 					commit(game, false);
 					refresh();
 				});
+
+		set(22, Icons.make(Items.BOOK, "Quiz subjects", ChatFormatting.LIGHT_PURPLE,
+				"Enabled: " + s.enabledTopics().stream().map(Topic::display).collect(Collectors.joining(", ")),
+				"Subjects a hunter can answer to respawn.",
+				"Click to choose them."),
+				p -> Menus.openQuizTopics(p));
 
 		// Sharing
 		set(28, Icons.toggle(Items.CHEST, "Share inventory", s.shareInventory,

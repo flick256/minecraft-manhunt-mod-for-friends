@@ -123,6 +123,16 @@ public final class ConfigIO {
         s.mathRespawn = boolOr(o, "mathRespawn", s.mathRespawn);
         s.mathQuestions = intOr(o, "mathQuestions", s.mathQuestions);
         s.mathDifficulty = intOr(o, "mathDifficulty", s.mathDifficulty);
+        JsonElement topics = o.get("quizTopics");
+        if (topics != null && topics.isJsonArray()) {
+            List<String> ids = new ArrayList<>();
+            for (JsonElement item : topics.getAsJsonArray()) {
+                if (item.isJsonPrimitive() && item.getAsJsonPrimitive().isString()) {
+                    ids.add(item.getAsString());
+                }
+            }
+            s.quizTopics = ids;
+        }
         s.shareInventory = boolOr(o, "shareInventory", s.shareInventory);
         s.shareEnderChest = boolOr(o, "shareEnderChest", s.shareEnderChest);
         s.shareHunger = boolOr(o, "shareHunger", s.shareHunger);

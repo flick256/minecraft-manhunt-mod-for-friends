@@ -19,6 +19,10 @@ public final class Menus {
 		show(p, "Manhunt: Settings", SettingsMenu::new);
 	}
 
+	public static void openQuizTopics(ServerPlayer p) {
+		show(p, "Manhunt: Quiz subjects", QuizTopicsMenu::new);
+	}
+
 	public static void openTeams(ServerPlayer p) {
 		show(p, "Manhunt: Teams", TeamsMenu::new);
 	}

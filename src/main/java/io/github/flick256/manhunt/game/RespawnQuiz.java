@@ -1,8 +1,9 @@
 package io.github.flick256.manhunt.game;
 
-import io.github.flick256.manhunt.core.MathQuestion;
-import io.github.flick256.manhunt.core.MathQuiz;
 import io.github.flick256.manhunt.core.Settings;
+import io.github.flick256.manhunt.core.quiz.Question;
+import io.github.flick256.manhunt.core.quiz.QuizBank;
+import io.github.flick256.manhunt.core.quiz.Topic;
 import io.github.flick256.manhunt.util.Msg;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -12,14 +13,17 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
 /**
- * Math quiz a hunter must solve before they can move again after dying. While in the quiz the player is frozen in
- * place, blinded and invulnerable (NOT in spectator mode: spectators can fly around and scout the runners, which
- * would make dying an advantage). State is keyed by UUID so a player who disconnects keeps their progress.
+ * Quiz a hunter must pass before they can move again after dying. The dying player picks one of the subjects the
+ * owner enabled (math, VCE-style methods, biology, chemistry, physics, history, french), then answers
+ * {@code mathQuestions} questions. While in the quiz the player is frozen in place, blinded and invulnerable
+ * (NOT in spectator mode: spectators can fly around and scout the runners, which would make dying an advantage).
+ * State is keyed by UUID so a player who disconnects keeps their progress.
  */
 public final class RespawnQuiz {
     /** How often (ticks) the current question is re-shown on the action bar. */
@@ -29,7 +33,8 @@ public final class RespawnQuiz {
     private static final int BLIND_DURATION = 100;
 
     private static final class State {
-        MathQuestion current;
+        Topic topic;      // null until the player has picked a subject
+        Question current; // null until a subject is picked
         int solved;
         int needed;
     }
@@ -55,41 +60,85 @@ public final class RespawnQuiz {
         return states.containsKey(id);
     }
 
-    /** Freezes + blinds the player and asks the first question. Also used by the Test Lab. */
+    /** Locks the player and starts the quiz (asks for a subject first when several are enabled). Also used by the Test Lab. */
     public void start(ServerPlayer p) {
         Settings s = game.settings();
         State st = new State();
         st.needed = Math.max(1, s.mathQuestions);
         st.solved = 0;
+        List<Topic> topics = s.enabledTopics();
+        if (topics.size() == 1) {
+            st.topic = topics.get(0);
+        }
         states.put(p.getUUID(), st);
         lock(p);
-        ask(p, st);
+        if (st.topic == null) {
+            askForTopic(p, topics);
+        } else {
+            ask(p, st);
+        }
     }
 
     /**
-     * Consumes a chat line (or /manhunt answer text) from a player in the quiz.
-     * Returns false if the player is not in the quiz, true if the text was consumed (right or wrong).
+     * Chat line from a player. Returns true when the text was consumed (a subject choice or a graded answer);
+     * false when the player is not in the quiz or the text is just ordinary chat, which is then broadcast normally.
      */
     public boolean handleAnswer(ServerPlayer p, String text) {
+        return handle(p, text, false);
+    }
+
+    /**
+     * {@code /manhunt answer <text>} or {@code /manhunt topic <subject>}. Returns false only when the player is not in
+     * the quiz; text that is not an answer gets a hint instead of being ignored.
+     */
+    public boolean handleCommand(ServerPlayer p, String text) {
+        return handle(p, text, true);
+    }
+
+    private boolean handle(ServerPlayer p, String text, boolean fromCommand) {
         State st = states.get(p.getUUID());
         if (st == null) {
             return false;
         }
-        if (MathQuiz.check(st.current, text)) {
-            st.solved++;
-            if (st.solved >= st.needed) {
-                release(p);
+        String in = text == null ? "" : text.trim();
+        List<Topic> topics = game.settings().enabledTopics();
+
+        // Grade an answer first, so a subject word can never hide a real answer.
+        if (st.current != null && st.current.isAnswerAttempt(in)) {
+            if (st.current.check(in)) {
+                st.solved++;
+                if (st.solved >= st.needed) {
+                    release(p);
+                    return true;
+                }
+                Msg.sound(p, SoundEvents.EXPERIENCE_ORB_PICKUP, 1.0f, 1.2f);
+                Msg.send(p, Msg.good("Correct! " + (st.needed - st.solved) + " more to go."));
+            } else {
+                Msg.send(p, Msg.bad("Wrong! New question."));
+                Msg.sound(p, SoundEvents.VILLAGER_NO, 1.0f, 1.0f);
+            }
+            ask(p, st);
+            return true;
+        }
+
+        // Pick or switch subject: by name ("biology", "bio") or by its number in the list.
+        Topic picked = parseTopic(in, topics);
+        if (picked != null) {
+            if (!topics.contains(picked)) {
+                Msg.send(p, Msg.bad(picked.display() + " is not enabled. Choose: " + names(topics)));
                 return true;
             }
-            Msg.sound(p, Ceremony.soundOf(SoundEvents.EXPERIENCE_ORB_PICKUP), 1.0f, 1.2f); // VERIFY: SoundEvents.EXPERIENCE_ORB_PICKUP
-            Msg.send(p, Msg.good("Correct! " + (st.needed - st.solved) + " more to go."));
+            st.topic = picked;
+            Msg.send(p, Msg.info("Subject: " + picked.display()));
             ask(p, st);
-        } else {
-            Msg.send(p, Msg.bad("Wrong! New question."));
-            Msg.sound(p, Ceremony.soundOf(SoundEvents.VILLAGER_NO), 1.0f, 1.0f); // VERIFY: SoundEvents.VILLAGER_NO
-            ask(p, st);
+            return true;
         }
-        return true;
+
+        if (fromCommand) {
+            remind(p, st);
+            return true;
+        }
+        return false; // ordinary chat
     }
 
     /**
@@ -146,20 +195,51 @@ public final class RespawnQuiz {
         p.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, BLIND_DURATION, 0, false, false, false));
     }
 
-    private void ask(ServerPlayer p, State st) {
-        st.current = MathQuiz.next(game.settings().mathDifficulty, rnd);
-        remind(p, st);
-        String progress = progress(st);
+    private void askForTopic(ServerPlayer p, List<Topic> topics) {
         Msg.title(p,
-                Component.literal("Solve to respawn " + progress).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD),
-                Component.literal(expression(st.current) + " = ?").withStyle(ChatFormatting.YELLOW),
+                Component.literal("Pick a subject").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD),
+                Component.literal("to answer and respawn").withStyle(ChatFormatting.YELLOW),
                 10, 70, 20);
+        sendTopicList(p, topics);
     }
 
-    /** Sends the chat prompt and action bar for the current question without generating a new one. */
+    private void sendTopicList(ServerPlayer p, List<Topic> topics) {
+        Msg.send(p, Msg.info("Pick a subject to answer so you can respawn (type its name or number in chat):"));
+        for (int i = 0; i < topics.size(); i++) {
+            Msg.send(p, Component.literal("  " + (i + 1) + ") " + topics.get(i).display() + " - " + topics.get(i).blurb())
+                    .withStyle(ChatFormatting.YELLOW));
+        }
+    }
+
+    private void ask(ServerPlayer p, State st) {
+        String avoid = st.current == null ? null : st.current.prompt();
+        st.current = QuizBank.next(st.topic, game.settings().mathDifficulty, rnd, avoid);
+        Msg.title(p,
+                Component.literal("Solve to respawn " + progress(st)).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD),
+                Component.literal(st.topic.display()).withStyle(ChatFormatting.YELLOW),
+                10, 70, 20);
+        remind(p, st);
+    }
+
+    /** Sends the chat prompt and action bar for the current question (or the subject list) without generating a new one. */
     private void remind(ServerPlayer p, State st) {
-        Msg.send(p, Msg.info("Solve to respawn " + progress(st) + ": " + expression(st.current)
-                + " = ?  Type the number in chat or /manhunt answer <n>"));
+        if (st.current == null) {
+            sendTopicList(p, game.settings().enabledTopics());
+            Msg.actionbar(p, actionbar(st));
+            return;
+        }
+        Msg.send(p, Msg.info("[" + st.topic.display() + "] Question " + progress(st) + ": " + st.current.prompt()));
+        List<String> choices = st.current.choices();
+        for (int i = 0; i < choices.size(); i++) {
+            Msg.send(p, Component.literal("   " + (char) ('A' + i) + ") " + choices.get(i)).withStyle(ChatFormatting.YELLOW));
+        }
+        String how = st.current.isMultipleChoice()
+                ? "Type A, B, C or D in chat (or /manhunt answer <letter>)."
+                : "Type the number in chat (or /manhunt answer <n>).";
+        if (game.settings().enabledTopics().size() > 1) {
+            how += " Type a subject name to switch subject.";
+        }
+        Msg.send(p, Component.literal(how).withStyle(ChatFormatting.GRAY));
         Msg.actionbar(p, actionbar(st));
     }
 
@@ -174,28 +254,51 @@ public final class RespawnQuiz {
                 Component.literal("Respawned!").withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD),
                 Component.literal("Back in the hunt").withStyle(ChatFormatting.GRAY),
                 10, 60, 20);
-        Msg.sound(p, Ceremony.soundOf(SoundEvents.PLAYER_LEVELUP), 1.0f, 1.0f); // VERIFY: SoundEvents.PLAYER_LEVELUP
+        Msg.sound(p, SoundEvents.PLAYER_LEVELUP, 1.0f, 1.0f);
         Msg.send(p, Msg.good("Respawned!"));
     }
 
     private Component actionbar(State st) {
-        return Component.literal("Respawn quiz " + progress(st) + ": " + expression(st.current) + " = ?")
-                .withStyle(ChatFormatting.GOLD);
+        if (st.current == null) {
+            return Component.literal("Pick a subject: " + names(game.settings().enabledTopics()))
+                    .withStyle(ChatFormatting.GOLD);
+        }
+        String q = st.current.prompt();
+        if (q.length() > 70) {
+            q = q.substring(0, 67) + "...";
+        }
+        return Component.literal(st.topic.display() + " " + progress(st) + ": " + q).withStyle(ChatFormatting.GOLD);
     }
 
     private static String progress(State st) {
         return "(" + (st.solved + 1) + "/" + st.needed + ")";
     }
 
-    /** Tolerates MathQuestion.text() with or without a trailing "= ?". */
-    private static String expression(MathQuestion q) {
-        String t = q.text().trim();
-        if (t.endsWith("?")) {
-            t = t.substring(0, t.length() - 1).trim();
+    private static String names(List<Topic> topics) {
+        StringBuilder sb = new StringBuilder();
+        for (Topic t : topics) {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append(t.id());
         }
-        if (t.endsWith("=")) {
-            t = t.substring(0, t.length() - 1).trim();
+        return sb.toString();
+    }
+
+    /** A subject by name/alias, or by its 1-based number in the enabled list. */
+    private static Topic parseTopic(String in, List<Topic> enabled) {
+        Topic byName = Topic.parse(in);
+        if (byName != null) {
+            return byName;
         }
-        return t;
+        try {
+            int n = Integer.parseInt(in.trim());
+            if (n >= 1 && n <= enabled.size()) {
+                return enabled.get(n - 1);
+            }
+        } catch (NumberFormatException ignored) {
+            // not a number
+        }
+        return null;
     }
 }
