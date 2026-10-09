@@ -1,0 +1,44 @@
+name: server-smoke-test
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'microsoft'
+      - run: chmod +x ./gradlew
+      - name: boot a dedicated server with the mod and run console commands
+        run: |
+          mkdir -p run
+          echo "eula=true" > run/eula.txt
+          printf 'online-mode=false\nlevel-type=flat\ngenerate-structures=false\nview-distance=2\nsimulation-distance=2\n' > run/server.properties
+          : > smoke.log
+          (
+            for i in $(seq 1 300); do
+              if grep -q 'Done (' smoke.log; then break; fi
+              sleep 2
+            done
+            for c in "manhunt status" "manhunt kind teams" "manhunt set hearts 30" "manhunt set hunger 3.0" \
+                     "manhunt set headstart 90" "manhunt set release staggered 45" "manhunt set mathquiz on 3 2" \
+                     "manhunt team create red Red red" "manhunt team create blue Blue blue" "manhunt team list" \
+                     "manhunt owner list" "manhunt status" "manhunt kind classic" "manhunt start" "mh status" "manhunt stop"; do
+              echo "$c"; sleep 2
+            done
+            echo stop
+          ) | timeout 600 ./gradlew runServer --console=plain 2>&1 | tee smoke.log || true
+      - name: summary
+        if: always()
+        run: |
+          echo "=== lines mentioning manhunt / errors ==="
+          grep -iE "manhunt|\[ERROR\]|Exception|crash" smoke.log | head -120 || true
+      - name: fail if the mod did not load or commands crashed
+        run: |
+          grep -q "Manhunt loaded" smoke.log
+          ! grep -E "Exception|Failed to (load|register)|crash report" smoke.log
