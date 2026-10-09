@@ -79,7 +79,7 @@ public final class ManhuntCommands {
 				// ---- owner: roster
 				.then(literal("hunter").requires(OWNER)
 						.executes(usageOf("/manhunt hunter <players>"))
-						.then(argument("players", EntityArgument.players())
+						.then(argument("players", EntityArgument.players()) // VERIFY: EntityArgument.players() (plural; singular player() is verified)
 								.executes(ManhuntCommands::hunter)))
 				.then(literal("runner").requires(OWNER)
 						.executes(usageOf("/manhunt runner <players> [team]"))
