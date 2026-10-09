@@ -14,7 +14,7 @@ jobs:
           java-version: '25'
           distribution: 'microsoft'
       - run: chmod +x ./gradlew
-      - run: ./gradlew build --stacktrace
+      - run: ./gradlew build --console=plain
       - uses: actions/upload-artifact@v7
         with:
           name: manhunt-mod
